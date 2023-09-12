@@ -1,0 +1,17 @@
+cff-version: 0.2.5
+title: deliberative commitment
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Dimitrios
+    family-names: Karoukis
+    orcid: 'https://orcid.org/0009-0008-4417-1713'
+repository-code: 'https://github.com/deliberative/commitment'
+url: 'https://deliberative.io'
+abstract: 'A cryptographic commitment scheme that implies order of ownership.'
+keywords:
+  - cryptography
+  - library
+license: AGPL-3.0

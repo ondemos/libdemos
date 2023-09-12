@@ -1,0 +1,6 @@
+build
+CMakeFiles
+.cache
+CMakeCache.txt
+cmake_install.cmake
+zig-cache
