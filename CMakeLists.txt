@@ -11,7 +11,7 @@ add_library(dcommitt_static_test STATIC ./src/dcommitt.c)
 include_directories(./libsodium/src/libsodium/include/sodium/)
 include_directories(./libsodium/src/libsodium/include/sodium/private/)
 
-target_compile_options(dcommitt PUBLIC -std=c17 -fPIC -flto -fwhole-program -Ofast)
+target_compile_options(dcommitt PUBLIC -std=c11 -fPIC -flto -fuse-linker-plugin -Ofast -ffp-contract=fast -ffast-math)
 target_compile_options(dcommitt_static PUBLIC -std=c17 -fPIC -flto -fwhole-program -Ofast)
 
 target_compile_options(
