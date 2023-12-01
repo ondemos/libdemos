@@ -1,0 +1,39 @@
+module.exports = {
+  "env": {
+    "browser": true,
+    "es2021": true,
+    "node": true,
+    "jest/globals": true
+  },
+  "extends": [
+    "prettier",
+    "eslint:recommended",
+    "plugin:@typescript-eslint/recommended",
+    "plugin:@typescript-eslint/recommended-requiring-type-checking",
+    "plugin:jest/recommended"
+  ],
+  "globals": {
+    "Atomics": "readonly",
+    "SharedArrayBuffer": "readonly"
+  },
+  "parser": "@typescript-eslint/parser",
+  "parserOptions": {
+    "tsconfigRootDir": __dirname,
+    "project": "./tsconfig.json",
+    "ecmaVersion": 2021,
+    "sourceType": "module",
+    "EXPERIMENTAL_useSourceOfProjectReferenceRedirect": true
+  },
+  "plugins": [
+    "eslint-plugin-jsdoc",
+    "eslint-plugin-jest",
+    "eslint-plugin-prefer-arrow",
+    "@typescript-eslint"
+  ],
+  "rules": {
+    "import/first": 0,
+    "import/no-duplicates": 0,
+    "import/no-mutable-exports": 0,
+    "no-multiple-empty-lines": 0
+  }
+}

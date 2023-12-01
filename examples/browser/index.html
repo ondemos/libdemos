@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html>
+  <body>
+    <!-- <script src="https://cdn.jsdelivr.net/npm/@deliberative/crypto@latest/lib/index.min.js"></script> -->
+    <script type="text/javascript">
+      const uint8ToHex = (array) => {
+        return array.reduce(
+          (str, byte) => str + byte.toString(16).padStart(2, "0"),
+          "",
+        );
+      };
+
+      function base64StringToArrayBuffer(b64str) {
+        var byteStr = atob(b64str)
+        var bytes = new Uint8Array(byteStr.length)
+        for (var i = 0; i < byteStr.length; i++) {
+          bytes[i] = byteStr.charCodeAt(i)
+        }
+        return bytes.buffer
+      }
+
+      function convertPemToBinary(pem) {
+        var lines = pem.split('\n')
+        var encoded = ''
+        for(var i = 0;i < lines.length;i++){
+          if (lines[i].trim().length > 0 &&
+              lines[i].indexOf('-BEGIN RSA PRIVATE KEY-') < 0 &&
+              lines[i].indexOf('-BEGIN RSA PUBLIC KEY-') < 0 &&
+              lines[i].indexOf('-END RSA PRIVATE KEY-') < 0 &&
+              lines[i].indexOf('-END RSA PUBLIC KEY-') < 0) {
+            encoded += lines[i].trim()
+          }
+        }
+        return base64StringToArrayBuffer(encoded)
+      }
+
+      const onClick = async () => {
+        try {
+          const crypto = globalThis.crypto;
+          const arr = new Uint8Array(16);
+          crypto.getRandomValues(arr);
+
+          const keypair = await crypto.subtle.generateKey(
+            {
+              name: "RSASSA-PKCS1-v1_5",
+              modulusLength: 4096,
+              publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
+              hash: { name: "SHA-512" },
+            },
+            true,
+            ["sign", "verify"]
+          );
+
+          const publicKey = await crypto.subtle.exportKey("spki", keypair.publicKey);
+          const secretKey = await crypto.subtle.exportKey("pkcs8", keypair.privateKey);
+
+
+          const sRecons = await crypto.subtle.importKey("pkcs8", secretKey, {
+              name: "RSASSA-PKCS1-v1_5",
+              modulusLength: 4096,
+              publicExponent: new Uint8Array([0x01, 0x00, 0x01]),
+              hash: { name: "SHA-512" },
+          }, true, ["sign"]);
+          const s = await crypto.subtle.exportKey("jwk", sRecons);
+          delete s.d;
+          delete s.dp;
+          delete s.dq;
+          delete s.p;
+          delete s.q;
+          delete s.qi;
+          s.key_ops = ["verify"];
+          const pRecons = await crypto.subtle.importKey("jwk", s, {name: "RSASSA-PKCS1-v1_5", hash: "SHA-512"}, true, ["verify"]);
+          const p = await crypto.subtle.exportKey("spki", pRecons);
+
+          console.log(new Uint8Array(publicKey))
+          console.log(new Uint8Array(p))
+
+          const sig = await crypto.subtle.sign({
+            name: "RSASSA-PKCS1-v1_5",
+            hash: {
+              name: "SHA-512"
+            },
+            modulusLength: 4096,
+            extractable: false,
+            publicExponent: new Uint8Array([1, 0, 1])
+          }, keypair.privateKey, arr)
+
+          console.log(new Uint8Array(sig))
+
+          const verify = await crypto.subtle.verify({
+            name: "RSASSA-PKCS1-v1_5",
+            hash: {
+              name: "SHA-512"
+            },
+            modulusLength: 4096,
+            extractable: false,
+            publicExponent: new Uint8Array([1, 0, 1])
+          }, keypair.publicKey, sig, arr) 
+
+          console.log(verify);
+
+          const pk = new Uint8Array(publicKey);
+          const pkk = pk.slice(33, pk.length);
+          const pkkk = pkk.slice(0, pkk.length - 5);
+          const sk = new Uint8Array(secretKey);
+          let skString = "";
+          let pkString = "";
+          for (let i = 0; i < sk.length; i++) {
+            skString += String(sk[i]);
+            if (i < pk.length) {
+              pkString += String(pkkk[i]);
+            }
+          }
+
+          console.log(pkkk)
+
+          console.log(skString.includes(pkString))
+
+        } catch (err) {
+          console.error(err);
+        }
+      };
+    </script>
+    <div id="root">
+      <button onClick="onClick()">Click me</button>
+    </div>
+  </body>
+</html>

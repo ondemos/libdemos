@@ -1,0 +1,63 @@
+name: "test"
+
+on:
+  push:
+    branches:
+      - "master"
+
+jobs:
+  test:
+    name: "Tests"
+    runs-on: "ubuntu-latest"
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+        with:
+          submodules: 'true'
+
+      - name: Cache LLVM and Clang
+        id: cache-llvm
+        uses: actions/cache@v2
+        with:
+          path: |
+            C:/Program Files/LLVM
+            ./llvm
+          key: llvm-13
+
+      - name: Install LLVM and Clang
+        uses: KyleMayes/install-llvm-action@v1.5.1
+        with:
+          version: "13"
+          cached: ${{ steps.cache-llvm.outputs.cache-hit }}
+
+      - name: Setup emsdk
+        uses: mymindstorm/setup-emsdk@v11
+        with:
+          # Make sure to set a version number!
+          version: 3.1.45
+          # This is the name of the cache folder.
+          # The cache folder will be placed in the build directory,
+          #  so make sure it doesn't conflict with anything!
+          actions-cache-folder: 'emsdk-cache'
+          update: true
+
+      - name: Verify
+        run: emcc -v
+
+      - name: Setup
+        run: npm install
+
+      - name: Jest
+        run: npm test
+
+      - name: Codecov
+        uses: codecov/codecov-action@v2
+        with:
+          # token: ${{ secrets.CODECOV_TOKEN }} # not required for public repos
+          # files: ./coverage1.xml,./coverage2.xml # optional
+          directory: ./coverage
+          # flags: unittests # optional
+          # name: codecov-umbrella # optional
+          fail_ci_if_error: true
+          # verbose: true # optional (default = false)
