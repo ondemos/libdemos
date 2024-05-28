@@ -3,10 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-#include "../include/dcommitt.h"
-
-#include "../libsodium/src/libsodium/randombytes/sysrandom/randombytes_sysrandom.c"
-#include "../libsodium/src/libsodium/sodium/runtime.c"
+#include "../include/demos.h"
 
 int
 main()
@@ -14,115 +11,177 @@ main()
   int res;
 
   const unsigned int IDENTITIES_LEN = 14;
-  const unsigned int NONCE_LEN = 12;
 
-  identity *id = new_identity(IDENTITIES_LEN, NONCE_LEN);
-  if (id == NULL)
+  uint8_t(*nonces)[crypto_auth_hmacsha512_KEYBYTES] = malloc(
+      sizeof(uint8_t[IDENTITIES_LEN][crypto_auth_hmacsha512_KEYBYTES]));
+  if (nonces == NULL)
   {
-    printf("Could not generate identities\n");
+    printf("Could not allocate space for nonces\n");
 
     return -1;
   }
 
-  // res = populate_identity(id->IDENTITIES_LEN, id->NONCE_LEN,
-  //                         (uint8_t(*)[NONCE_LEN])id->nonces, id->public_keys,
-  //                         id->secret_keys, id->reversible_commit_details,
-  //                         id->irreversible_commit_details);
+  printf("Allocated space for nonces\n");
 
-  // if (res != 0)
-  // {
-  //   free_identity(id);
-
-  //   printf("Could not generate commit details\n");
-
-  //   return -2;
-  // }
-
-  const unsigned int COMMIT_LEN = crypto_hash_sha512_BYTES;
-  uint8_t *initial_commit = malloc(sizeof(uint8_t[COMMIT_LEN]));
-
-  randombytes_buf(initial_commit, COMMIT_LEN);
-
-  uint8_t *new_commit = malloc(sizeof(uint8_t[COMMIT_LEN]));
-  if (new_commit == NULL)
+  uint8_t(*public_keys)[crypto_sign_ed25519_PUBLICKEYBYTES] = malloc(
+      sizeof(uint8_t[IDENTITIES_LEN][crypto_sign_ed25519_PUBLICKEYBYTES]));
+  if (public_keys == NULL)
   {
-    free(initial_commit);
-    free_identity(id);
+    printf("Could not allocate space for public keys\n");
+    free(nonces);
 
-    printf("Could not allocate new commit\n");
+    return -2;
+  }
+
+  printf("Allocated space for public keys\n");
+
+  uint8_t(*secret_keys)[crypto_sign_ed25519_SECRETKEYBYTES] = malloc(
+      sizeof(uint8_t[IDENTITIES_LEN][crypto_sign_ed25519_SECRETKEYBYTES]));
+  if (secret_keys == NULL)
+  {
+    printf("Could not allocate space for secret keys\n");
+    free(nonces);
+    free(public_keys);
 
     return -3;
   }
 
-  res = commitment_update_reversible(new_commit, initial_commit,
-                                     id->reversible_commit_details);
-  if (res != 0)
+  printf("Allocated space for secret keys\n");
+
+  uint8_t(*external_details)[crypto_hash_sha512_BYTES]
+      = malloc(sizeof(uint8_t[IDENTITIES_LEN][crypto_auth_hmacsha512_BYTES]));
+  if (external_details == NULL)
   {
-    free(initial_commit);
-    free(new_commit);
-    free_identity(id);
-
-    printf("Could not reversibly update the commit\n");
-
-    return -4;
-  }
-
-  res = commitment_update_irreversible(new_commit, initial_commit,
-                                       id->irreversible_commit_details);
-  if (res != 0)
-  {
-    free(initial_commit);
-    free(new_commit);
-    free_identity(id);
-
-    printf("Could not irreversibly update the commit\n");
+    printf("Could not allocate space for external commit details\n");
+    free(nonces);
+    free(public_keys);
+    free(secret_keys);
 
     return -5;
   }
 
-  const unsigned int PROOF_LEN
-      = (1 + id->IDENTITIES_LEN) * crypto_hash_sha512_BYTES + 2 * 4
-        + crypto_sign_ed25519_PUBLICKEYBYTES + crypto_sign_ed25519_BYTES;
-  uint8_t *proof = malloc(sizeof(uint8_t[PROOF_LEN]));
-  if (proof == NULL)
-  {
-    free(initial_commit);
-    free(new_commit);
-    free_identity(id);
+  printf("Allocated space for external commit details\n");
 
-    printf("Could not allocate commitment proof\n");
+  res = generate_identities(IDENTITIES_LEN, nonces, public_keys, secret_keys,
+                            external_details);
+  if (res != 0)
+  {
+    printf("Could not generate identities\n");
+    free(nonces);
+    free(public_keys);
+    free(secret_keys);
+    free(external_details);
 
     return -6;
   }
 
-  res = generate_ownership_proof(
-      PROOF_LEN, id->IDENTITIES_LEN, id->NONCE_LEN, new_commit, initial_commit,
-      (uint8_t(*)[NONCE_LEN])id->nonces, id->public_keys,
-      id->secret_keys[IDENTITIES_LEN - 1], proof);
-  if (res != 0)
-  {
-    free(proof);
-    free(initial_commit);
-    free(new_commit);
-    free_identity(id);
+  printf("Generated identities\n");
 
-    printf("Could not generate ownership proof\n");
+  uint8_t *current_commit
+      = (uint8_t *)malloc(sizeof(uint8_t[crypto_hash_sha512_BYTES]));
+  if (current_commit == NULL)
+  {
+    printf("Could allocate space for initial commit\n");
+    free(nonces);
+    free(public_keys);
+    free(secret_keys);
+    free(external_details);
 
     return -7;
   }
 
-  res = verify_ownership_proof(PROOF_LEN, new_commit, proof);
+  printf("Allocated space for current commit\n");
+
+  uint8_t *initial_commit
+      = (uint8_t *)malloc(sizeof(uint8_t[crypto_hash_sha512_BYTES]));
+  if (initial_commit == NULL)
+  {
+    printf("Could allocate space for initial commit\n");
+    free(nonces);
+    free(public_keys);
+    free(secret_keys);
+    free(external_details);
+    free(current_commit);
+
+    return -8;
+  }
+
+  printf("Allocated space for initial commit\n");
+
+  randombytes_buf(initial_commit, crypto_hash_sha512_BYTES);
+
+  res = commit(current_commit, initial_commit,
+               external_details[IDENTITIES_LEN - 1]);
+  if (res != 0)
+  {
+    printf("Could not reversibly update the initial commit\n");
+    free(nonces);
+    free(public_keys);
+    free(secret_keys);
+    free(external_details);
+    free(initial_commit);
+    free(current_commit);
+
+    return -9;
+  }
+
+  const unsigned int IDENTITY_INDEX_USED = IDENTITIES_LEN - 3;
+
+  const unsigned int PROOF_LEN = crypto_hash_sha512_BYTES
+                                 + (IDENTITIES_LEN - IDENTITY_INDEX_USED)
+                                       * (crypto_sign_ed25519_PUBLICKEYBYTES
+                                          + crypto_auth_hmacsha512_KEYBYTES)
+                                 + crypto_sign_ed25519_BYTES;
+  uint8_t *proof = malloc(sizeof(uint8_t[PROOF_LEN]));
+  if (proof == NULL)
+  {
+    printf("Could not allocate commitment proof\n");
+
+    free(nonces);
+    free(public_keys);
+    free(secret_keys);
+    free(external_details);
+    free(initial_commit);
+    free(current_commit);
+
+    return -10;
+  }
+
+  res = generate_proof(PROOF_LEN, IDENTITIES_LEN, current_commit,
+                       initial_commit, nonces, public_keys,
+                       secret_keys[IDENTITY_INDEX_USED], proof);
+  if (res != 0)
+  {
+    printf("Could not generate ownership proof %d\n", res);
+
+    free(proof);
+    free(nonces);
+    free(public_keys);
+    free(secret_keys);
+    free(external_details);
+    free(initial_commit);
+    free(current_commit);
+
+    return -11;
+  }
+
+  printf("Generated ownership proof\n");
+
+  res = verify_proof(PROOF_LEN, current_commit, proof);
 
   free(proof);
+  free(nonces);
+  free(public_keys);
+  free(secret_keys);
+  free(external_details);
   free(initial_commit);
-  free(new_commit);
-  free_identity(id);
+  free(current_commit);
 
   if (res < 0)
   {
-    printf("Proof verification is wrong\n");
+    printf("Proof verification is wrong %d\n", res);
 
-    return -8;
+    return -15 + res;
   }
 
   printf("SUCCESS. Identity's distance from commit was %i\n", res);

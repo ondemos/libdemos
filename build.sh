@@ -8,7 +8,8 @@
 #     -v \
 #     -Ofast # \
 #     # -lm
-cmake -B build
+clang-format -i src/**/*.[c,h] __tests__/**/*.[c,h] include/*.h
+cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -B build
 cmake --build build
 
 # # Compile test for valgrind
@@ -47,14 +48,18 @@ cmake --build build
 
 chmod a+x ./build/__tests__/test
 ./build/__tests__/test
-rm -rf ./build/valgrind
-mkdir ./build/valgrind
-valgrind --log-file=./build/valgrind/log.txt \
-    --leak-check=full \
-    --show-leak-kinds=all \
-    --track-origins=yes \
-    --verbose \
-    --dsymutil=yes \
-    --trace-children=yes \
-    -v \
-    ./build/__tests__/test
+# rm -rf ./build/valgrind
+# mkdir ./build/valgrind
+# valgrind --log-file=./build/valgrind/log.txt \
+#     --leak-check=full \
+#     --show-leak-kinds=all \
+#     --track-origins=yes \
+#     --verbose \
+#     --dsymutil=yes \
+#     --trace-children=yes \
+#     -v \
+#     ./build/__tests__/test
+
+source ./emsdk/emsdk_env.sh
+NODE_OR_BROWSER="browser" NODE_ENV="production" node scripts/emscripten.js
+NODE_OR_BROWSER="node" NODE_ENV="production" node scripts/emscripten.js

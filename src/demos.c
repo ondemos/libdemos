@@ -1,0 +1,8 @@
+#include "./chacha20poly1305/chacha20poly1305.c"
+#include "./merkle/merkle.c"
+#include "./shamir/shamir.c"
+#include "./utils/utils.c"
+#include "commit.c"
+#include "identities.c"
+#include "proof.c"
+#include "verify.c"

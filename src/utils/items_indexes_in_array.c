@@ -1,9 +1,7 @@
-#include <stdbool.h>
-
-#include "../../../libsodium/src/libsodium/include/sodium/crypto_hash_sha512.h"
+#include "./utils.h"
 
 // Output is an array of indexes of the elements
-__attribute__((used)) void
+void
 items_indexes_in_array(
     const size_t ARRAY_LEN, const size_t ITEMS_ARRAY_LEN,
     const uint8_t array[ARRAY_LEN][crypto_hash_sha512_BYTES],

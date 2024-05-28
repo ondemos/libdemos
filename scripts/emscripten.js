@@ -1,0 +1,218 @@
+const fs = require("fs");
+const path = require("path");
+const { execSync } = require("child_process");
+
+const { 
+  methodsPath,
+  libsodiumIncludePath,
+  libsodiumIncludePrivatePath,
+  libsodiumCodecsPath,
+  libsodiumCorePath,
+  libsodiumUtilsPath,
+  libsodiumHashPath,
+  libsodiumEd255191,
+  libsodiumEd255192,
+  libsodiumEd255193,
+  libsodiumEd255194,
+  libsodiumEd255195,
+  libsodiumGenericHashMainPath,
+  libsodiumGenericHash1Path,
+  libsodiumGenericHash2Path,
+  libsodiumGenericHash3Path,
+  libsodiumPolyPath,
+  libsodiumAuthPath,
+  libsodiumChacha1,
+  libsodiumChacha2,
+  libsodiumChacha3,
+  libsodiumChacha4,
+  libsodiumKx1,
+  libsodiumKx2,
+  libsodiumKx3,
+  libsodiumKx4,
+  libsodiumKx5,
+  libsodiumArgon1,
+  libsodiumArgon2,
+  libsodiumArgon3,
+  libsodiumArgon4,
+  libsodiumArgon5,
+  libsodiumArgon6,
+  libsodiumRandomBytesPath,
+} = require("./paths")
+
+const buildPath = path.join(
+  process.cwd(), 
+  "build", 
+  "wasm", 
+  process.env.NODE_OR_BROWSER === "browser" 
+    ? "browser" 
+    : "node"
+);
+if (fs.existsSync(buildPath))
+  fs.rmSync(buildPath, { recursive: true, force: true });
+fs.mkdirSync(buildPath, { recursive: true, force: true });
+const wasmPath = path.join(buildPath, "libdemos.js");
+const typesPath = path.join(
+  process.cwd(),
+  "scripts",
+  "libdemos.d.ts",
+);
+const types = fs.readFileSync(typesPath);
+fs.writeFileSync(wasmPath.replace("mos.js", "mos.d.ts"), types);
+
+const withJS = ` \
+-s WASM=1 \
+-s MODULARIZE=1 \
+-s MAIN_MODULE=2 \
+-s INCOMING_MODULE_JS_API=\[\"wasmMemory\"\] \
+-s POLYFILL=0 \
+-s NO_DYNAMIC_EXECUTION=1 \
+-s WEBSOCKET_SUBPROTOCOL=null \
+-s GL_EMULATE_GLES_VERSION_STRING_FORMAT=0 \
+-s GL_EXTENSIONS_IN_PREFIXED_FORMAT=0 \
+-s GL_SUPPORT_AUTOMATIC_ENABLE_EXTENSIONS=0 \
+-s GL_SUPPORT_SIMPLE_ENABLE_EXTENSIONS=0 \
+-s GL_TRACK_ERRORS=0 \
+-s GL_POOL_TEMP_BUFFERS=0 \
+-s MIN_WEBGL_VERSION=2 \
+-s MAX_WEBGL_VERSION=2 \
+-s GL_WORKAROUND_SAFARI_GETCONTEXT_BUG=0 \
+-s SUPPORT_LONGJMP=0 \
+`;
+
+const browser =
+  process.env.NODE_OR_BROWSER === "browser" ? ` \
+-s SINGLE_FILE=1 \
+-s ENVIRONMENT=\'web\' \
+` : `\
+-s ENVIRONMENT=\'node\' \
+`;
+
+const memory = `\
+-s IMPORTED_MEMORY=1 \
+-s ALLOW_MEMORY_GROWTH=1 \
+-s INITIAL_MEMORY=${process.env.NODE_ENV === "production" ? "256kb" : "10mb" } \
+-s STACK_SIZE=${process.env.NODE_ENV === "production" ? "128kb" : "5mb" } \
+-s MALLOC=emmalloc-memvalidate \
+-s MEMORY_GROWTH_LINEAR_STEP=128kb \
+-s GLOBAL_BASE=4096 \
+`;
+
+const emcc = `\
+emcc \
+--no-entry \
+-fno-exceptions \
+-fno-PIC \
+-fPIE \
+-fno-common \
+-ffunction-sections \
+-fdata-sections \
+-fdelete-null-pointer-checks \
+-fno-asm \
+-ffinite-loops \
+-fjump-tables \
+-fno-keep-static-consts \
+-fvectorize \
+-s STRICT \
+${memory} \
+${withJS} \
+${browser} \
+-s NODEJS_CATCH_EXIT=0 \
+-s NODEJS_CATCH_REJECTION=0 \
+`;
+
+const testing =
+  process.env.NODE_ENV === "production"
+    ? `\
+-flto \
+-Os \
+-s FILESYSTEM=0 \
+-s ASSERTIONS=0 \
+-s INVOKE_RUN=0 \
+`
+    : `\
+-Og \
+-g3 \
+--profiling \
+-gsource-map \
+-fsanitize=undefined \
+-s ASSERTIONS=2 \
+-s RUNTIME_DEBUG=1 \
+-s SAFE_HEAP=2 \
+-s STACK_OVERFLOW_CHECK=2 \
+-s EXIT_RUNTIME=1 \
+`;
+
+execSync(
+  `\
+${emcc} \
+${testing} \
+-s EXPORTED_FUNCTIONS=\
+_malloc,\
+_free,\
+_sign,\
+_verify,\
+_encrypt_chachapoly,\
+_decrypt_chachapoly,\
+_commit,\
+_generate_proof,\
+_generate_identities,\
+_verify_proof,\
+_argon2,\
+_sha512,\
+_keypair,\
+_keypair_from_seed,\
+_keypair_from_secret_key,\
+_split_secret,\
+_restore_secret,\
+_get_merkle_proof,\
+_get_merkle_root,\
+_get_merkle_root_from_proof,\
+_verify_merkle_proof,\
+_random_number_in_range \
+-s EXPORT_NAME=libdemos \
+-I${libsodiumIncludePath} \
+-I${libsodiumIncludePrivatePath} \
+-o ${wasmPath} \
+${methodsPath} \
+${libsodiumCorePath} \
+${libsodiumCodecsPath} \
+${libsodiumUtilsPath} \
+${libsodiumRandomBytesPath} \
+${libsodiumHashPath} \
+${libsodiumEd255191} \
+${libsodiumEd255192} \
+${libsodiumEd255193} \
+${libsodiumEd255194} \
+${libsodiumEd255195} \
+${libsodiumGenericHashMainPath} \
+${libsodiumGenericHash1Path} \
+${libsodiumGenericHash2Path} \
+${libsodiumGenericHash3Path} \
+${libsodiumPolyPath} \
+${libsodiumAuthPath} \
+${libsodiumChacha1} \
+${libsodiumChacha2} \
+${libsodiumChacha3} \
+${libsodiumChacha4} \
+${libsodiumKx1} \
+${libsodiumKx2} \
+${libsodiumKx3} \
+${libsodiumKx4} \
+${libsodiumKx5} \
+${libsodiumArgon1} \
+${libsodiumArgon2} \
+${libsodiumArgon3} \
+${libsodiumArgon4} \
+${libsodiumArgon5} \
+${libsodiumArgon6} \
+`,
+  { stdio: "inherit" },
+);
+
+let content = fs.readFileSync(wasmPath, "utf8");
+fs.writeFileSync(
+  wasmPath,
+  "'use strict'" + content.replace('"use strict"', ""),
+);
+
+console.log("Successfully compiled libdemos c methods to Wasm.");
