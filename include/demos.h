@@ -96,8 +96,7 @@ extern "C"
       uint8_t nonces[IDENTITIES_LEN][crypto_auth_hmacsha512_KEYBYTES],
       uint8_t public_keys[IDENTITIES_LEN][crypto_sign_ed25519_PUBLICKEYBYTES],
       uint8_t secret_keys[IDENTITIES_LEN][crypto_sign_ed25519_SECRETKEYBYTES],
-      uint8_t external_commit_details[IDENTITIES_LEN]
-                                     [crypto_auth_hmacsha512_BYTES]);
+      uint8_t commit_details[crypto_auth_hmacsha512_BYTES]);
 
   DEMOS_PUBLIC int commit(uint8_t out[crypto_hash_sha512_BYTES],
                           const uint8_t in[crypto_hash_sha512_BYTES],

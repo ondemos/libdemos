@@ -48,11 +48,11 @@ main()
 
   printf("Allocated space for secret keys\n");
 
-  uint8_t(*external_details)[crypto_hash_sha512_BYTES]
-      = malloc(sizeof(uint8_t[IDENTITIES_LEN][crypto_auth_hmacsha512_BYTES]));
-  if (external_details == NULL)
+  uint8_t *commit_details
+      = (uint8_t *)malloc(sizeof(uint8_t[crypto_auth_hmacsha512_BYTES]));
+  if (commit_details == NULL)
   {
-    printf("Could not allocate space for external commit details\n");
+    printf("Could not allocate space for commit details\n");
     free(nonces);
     free(public_keys);
     free(secret_keys);
@@ -63,14 +63,14 @@ main()
   printf("Allocated space for external commit details\n");
 
   res = generate_identities(IDENTITIES_LEN, nonces, public_keys, secret_keys,
-                            external_details);
+                            commit_details);
   if (res != 0)
   {
     printf("Could not generate identities\n");
     free(nonces);
     free(public_keys);
     free(secret_keys);
-    free(external_details);
+    free(commit_details);
 
     return -6;
   }
@@ -85,7 +85,7 @@ main()
     free(nonces);
     free(public_keys);
     free(secret_keys);
-    free(external_details);
+    free(commit_details);
 
     return -7;
   }
@@ -100,7 +100,7 @@ main()
     free(nonces);
     free(public_keys);
     free(secret_keys);
-    free(external_details);
+    free(commit_details);
     free(current_commit);
 
     return -8;
@@ -110,29 +110,28 @@ main()
 
   randombytes_buf(initial_commit, crypto_hash_sha512_BYTES);
 
-  res = commit(current_commit, initial_commit,
-               external_details[IDENTITIES_LEN - 1]);
+  res = commit(current_commit, initial_commit, commit_details);
+  free(commit_details);
   if (res != 0)
   {
     printf("Could not reversibly update the initial commit\n");
     free(nonces);
     free(public_keys);
     free(secret_keys);
-    free(external_details);
     free(initial_commit);
     free(current_commit);
 
     return -9;
   }
 
-  const unsigned int IDENTITY_INDEX_USED = IDENTITIES_LEN - 3;
+  const unsigned int IDENTITY_INDEX_USED = IDENTITIES_LEN - 2;
 
   const unsigned int PROOF_LEN = crypto_hash_sha512_BYTES
                                  + (IDENTITIES_LEN - IDENTITY_INDEX_USED)
                                        * (crypto_sign_ed25519_PUBLICKEYBYTES
                                           + crypto_auth_hmacsha512_KEYBYTES)
                                  + crypto_sign_ed25519_BYTES;
-  uint8_t *proof = malloc(sizeof(uint8_t[PROOF_LEN]));
+  uint8_t *proof = (uint8_t *)malloc(sizeof(uint8_t[PROOF_LEN]));
   if (proof == NULL)
   {
     printf("Could not allocate commitment proof\n");
@@ -140,7 +139,6 @@ main()
     free(nonces);
     free(public_keys);
     free(secret_keys);
-    free(external_details);
     free(initial_commit);
     free(current_commit);
 
@@ -158,7 +156,6 @@ main()
     free(nonces);
     free(public_keys);
     free(secret_keys);
-    free(external_details);
     free(initial_commit);
     free(current_commit);
 
@@ -173,7 +170,6 @@ main()
   free(nonces);
   free(public_keys);
   free(secret_keys);
-  free(external_details);
   free(initial_commit);
   free(current_commit);
 

@@ -115,15 +115,9 @@ export interface LibDemos extends EmscriptenModule {
     nonces: number,
     public_keys: number,
     secret_keys: number,
-    reversible_details: number,
-    irreversible_details: number,
+    commit_details: number,
   ): number;
-  _commitment_update_reversible(
-    updatedCommit: number,
-    previousCommit: number,
-    details: number,
-  ): number;
-  _commitment_update_irreversible(
+  _commit(
     updatedCommit: number,
     previousCommit: number,
     details: number,
@@ -131,8 +125,7 @@ export interface LibDemos extends EmscriptenModule {
   _generate_proof(
     PROOF_LEN: number,
     IDENTITIES_LEN: number,
-    NONCE_LEN: number,
-    commitment: number,
+    currentCommit: number,
     previousCommit: number,
     nonces: number,
     public_keys: number,
@@ -141,7 +134,7 @@ export interface LibDemos extends EmscriptenModule {
   ): number;
   _verify_proof(
     PROOF_LEN: number,
-    commitment: number, // Uint8Array.byteOffset
+    currentCommit: number, // Uint8Array.byteOffset
     proof: number, // Uint8Array.byteOffset
   ): number;
 }
