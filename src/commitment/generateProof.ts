@@ -1,78 +1,82 @@
 import demosMemory from "./memory";
 
-import demosMethodsModule from "../../build/demosMethodsModule";
+import libdemos from "@libdemos";
 
 import {
   crypto_sign_ed25519_PUBLICKEYBYTES,
   crypto_sign_ed25519_SECRETKEYBYTES,
-  crypto_sign_ed25519_BYTES,
   crypto_hash_sha512_BYTES,
+  crypto_auth_hmacsha512_KEYBYTES,
+  getProofLen,
 } from "../utils/interfaces";
 
-import type { DemosMethodsModule } from "../../build/demosMethodsModule";
+import type { LibDemos } from "@libdemos";
 
 const generateProof = async (
-  commitment: Uint8Array,
+  identityChosenIndex: number,
+  currentCommit: Uint8Array,
   previousCommit: Uint8Array,
   nonces: Uint8Array[],
   publicKeys: Uint8Array[],
-  secretKey: Uint8Array,
-  module?: DemosMethodsModule,
+  secretKeys: Uint8Array[],
+  module?: LibDemos,
 ): Promise<Uint8Array> => {
   const identitiesLen = nonces.length;
-  if (identitiesLen !== publicKeys.length)
+  if (
+    identitiesLen !== publicKeys.length ||
+    identitiesLen !== secretKeys.length
+  )
     throw new Error("Unbalanced information provided.");
 
-  const nonceLen = nonces[0].length;
-
-  const proofLen =
-    (1 + identitiesLen) * crypto_hash_sha512_BYTES +
-    2 * 4 +
-    crypto_sign_ed25519_PUBLICKEYBYTES +
-    crypto_sign_ed25519_BYTES;
+  if (identityChosenIndex >= identitiesLen)
+    throw new Error("Identity chosen is out of bounds.");
 
   const wasmMemory = module
     ? module.wasmMemory
-    : demosMemory.generateProofMemory(identitiesLen, nonceLen, proofLen);
+    : demosMemory.generateProofMemory(identitiesLen, identityChosenIndex);
   const demosModule =
     module ||
-    (await demosMethodsModule({
+    (await libdemos({
       wasmMemory,
     }));
 
   const ptr1 = demosModule._malloc(crypto_hash_sha512_BYTES);
-  const commitmentArray = new Uint8Array(
-    demosModule.HEAPU8.buffer,
+  const currentCommitArray = new Uint8Array(
+    wasmMemory.buffer,
     ptr1,
     crypto_hash_sha512_BYTES,
   );
-  commitmentArray.set(commitment);
+  currentCommitArray.set(currentCommit);
 
   const ptr2 = demosModule._malloc(crypto_hash_sha512_BYTES);
   const previousCommitArray = new Uint8Array(
-    demosModule.HEAPU8.buffer,
+    wasmMemory.buffer,
     ptr2,
     crypto_hash_sha512_BYTES,
   );
   previousCommitArray.set(previousCommit);
 
   const ptr3 = demosModule._malloc(
-    identitiesLen * nonceLen * Uint8Array.BYTES_PER_ELEMENT,
+    identitiesLen *
+      crypto_auth_hmacsha512_KEYBYTES *
+      Uint8Array.BYTES_PER_ELEMENT,
   );
   const noncesArray = new Uint8Array(
-    demosModule.HEAPU8.buffer,
+    wasmMemory.buffer,
     ptr3,
-    identitiesLen * nonceLen * Uint8Array.BYTES_PER_ELEMENT,
+    identitiesLen *
+      crypto_auth_hmacsha512_KEYBYTES *
+      Uint8Array.BYTES_PER_ELEMENT,
   );
   for (let i = 0; i < identitiesLen; i++) {
-    noncesArray.set(nonces[i], i * nonceLen);
+    noncesArray.set(nonces[i], i * crypto_auth_hmacsha512_KEYBYTES);
   }
 
   const ptr4 = demosModule._malloc(
     identitiesLen * crypto_sign_ed25519_PUBLICKEYBYTES,
   );
   const publicKeysArray = new Uint8Array(
-    demosModule.HEAPU8.buffer,
+    wasmMemory.buffer,
     ptr4,
     identitiesLen * crypto_sign_ed25519_PUBLICKEYBYTES,
   );
@@ -82,15 +86,17 @@ const generateProof = async (
 
   const ptr5 = demosModule._malloc(crypto_sign_ed25519_SECRETKEYBYTES);
   const secretKeyArray = new Uint8Array(
-    demosModule.HEAPU8.buffer,
+    wasmMemory.buffer,
     ptr5,
     crypto_sign_ed25519_SECRETKEYBYTES,
   );
-  secretKeyArray.set(secretKey);
+  secretKeyArray.set(secretKeys[identityChosenIndex]);
+
+  const proofLen = getProofLen(identitiesLen, identityChosenIndex);
 
   const ptr6 = demosModule._malloc(proofLen * Uint8Array.BYTES_PER_ELEMENT);
   const proofArray = new Uint8Array(
-    demosModule.HEAPU8.buffer,
+    wasmMemory.buffer,
     ptr6,
     proofLen * Uint8Array.BYTES_PER_ELEMENT,
   );
@@ -98,8 +104,7 @@ const generateProof = async (
   const result = demosModule._generate_proof(
     proofLen,
     identitiesLen,
-    nonceLen,
-    commitmentArray.byteOffset,
+    currentCommitArray.byteOffset,
     previousCommitArray.byteOffset,
     noncesArray.byteOffset,
     publicKeysArray.byteOffset,

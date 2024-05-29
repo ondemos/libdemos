@@ -1,10 +1,10 @@
 import demosMemory from "./memory";
 
-import demosMethodsModule from "../../build/demosMethodsModule";
+import libdemos from "@libdemos";
 
 import { crypto_hash_sha512_BYTES } from "../utils/interfaces";
 
-import type { DemosMethodsModule } from "../../build/demosMethodsModule";
+import type { LibDemos } from "@libdemos";
 
 /**
  * Verifies that the hash was indeed included in the calculation of the Merkle root.
@@ -14,9 +14,9 @@ import type { DemosMethodsModule } from "../../build/demosMethodsModule";
  * byte is either 0 or 1, indicating whether it is to the left or to the right in the tree.
  */
 const verifyProof = async (
-  commitment: Uint8Array,
+  commit: Uint8Array,
   proof: Uint8Array,
-  module?: DemosMethodsModule,
+  module?: LibDemos,
 ): Promise<number> => {
   const proofLen = proof.length;
   const wasmMemory = module
@@ -24,21 +24,21 @@ const verifyProof = async (
     : demosMemory.verifyProofMemory(proofLen);
   const demosModule =
     module ||
-    (await demosMethodsModule({
+    (await libdemos({
       wasmMemory,
     }));
 
   const ptr1 = demosModule._malloc(crypto_hash_sha512_BYTES);
-  const commitmentArray = new Uint8Array(
-    demosModule.HEAPU8.buffer,
+  const commitArray = new Uint8Array(
+    wasmMemory.buffer,
     ptr1,
     crypto_hash_sha512_BYTES,
   );
-  commitmentArray.set(commitment);
+  commitArray.set(commit);
 
   const ptr2 = demosModule._malloc(proofLen * Uint8Array.BYTES_PER_ELEMENT);
   const proofArray = new Uint8Array(
-    demosModule.HEAPU8.buffer,
+    wasmMemory.buffer,
     ptr2,
     proofLen * Uint8Array.BYTES_PER_ELEMENT,
   );
@@ -46,7 +46,7 @@ const verifyProof = async (
 
   const result = demosModule._verify_proof(
     proofLen,
-    commitmentArray.byteOffset,
+    commitArray.byteOffset,
     proofArray.byteOffset,
   );
 

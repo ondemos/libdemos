@@ -1,29 +1,28 @@
 {
-  "name": "@deliberative/commitment",
+  "name": "ondemos",
   "description": "A cryptographic commitment scheme with implied order of ownership wasm module for nodejs and the browser.",
   "version": "0.2.5",
   "repository": {
     "type": "git",
-    "url": "https://github.com/deliberative/commitment.git"
+    "url": "https://git.ondemos.org/core-js.git"
   },
   "author": {
-    "name": "Deliberative Technologies P.C.",
-    "email": "security@deliberative.io",
-    "url": "https://github.com/deliberative"
+    "name": "Ondemos Foundation",
+    "email": "security@ondemos.org",
+    "url": "https://www.ondemos.org"
   },
   "contributors": [
     {
       "name": "Dimitris Karoukis",
-      "email": "dim@deliberative.io",
-      "url": "https://deliberative.io"
+      "email": "dim@ondemos.org",
+      "url": "https://www.ondemos.org"
     }
   ],
   "license": "AGPL-3.0",
   "bugs": {
-    "url": "https://github.com/deliberative/commitment/issues"
+    "url": "https://git.ondemos.org/core-js/issues"
   },
   "keywords": [
-    "deliberative",
     "cryptographic commitment scheme",
     "commitment",
     "ledger",
@@ -34,7 +33,7 @@
     "emscripten",
     "typescript"
   ],
-  "homepage": "https://github.com/deliberative/commitment#readme",
+  "homepage": "https://git.ondemos.org/core-js#readme",
   "main": "lib/index.cjs",
   "module": "lib/index.mjs",
   "browser": "lib/index.min.js",
@@ -59,30 +58,26 @@
   ],
   "scripts": {
     "start": "cross-env NODE_ENV=development rollup --config rollup.config.ts --configPlugin typescript",
-    "wasm": "cross-env NODE_ENV=production node scripts/compileMethods.js",
-    "wasm:debug": "cross-env NODE_ENV=development node scripts/compileMethods.js",
-    "valgrind": "node scripts/testWithValgrind.js",
-    "postvalgrind": "./examples/c/dcrypto_methods.o && rm -rf examples/c/dcrypto_methods.o",
-    "code": "cross-env NODE_ENV=production rollup --config rollup.config.ts --configPlugin typescript",
-    "code:debug": "cross-env NODE_ENV=development rollup --config rollup.config.ts --configPlugin typescript",
-    "build": "npm-run-all -s wasm code",
-    "postbuild": "node scripts/post.js",
-    "build:debug": "npm-run-all -s wasm:debug code:debug postbuild",
+    "build:browser": "cross-env NODE_ENV=production NODE_OR_BROWSER=browser rollup --config rollup.config.ts --configPlugin typescript",
+    "build:node": "cross-env NODE_ENV=production NODE_OR_BROWSER=node rollup --config rollup.config.ts --configPlugin typescript",
+    "copy:wasm": "rm -rf wasm && cp -r ../core/build/wasm wasm",
+    "build": "npm-run-all -s build:node build:browser",
+    "build:debug": "cross-env NODE_ENV=development rollup --config rollup.config.ts --configPlugin typescript",
+    "postbuild": "node scripts/postBuild.js",
     "jest": "jest --config jest.config.json",
-    "test": "npm-run-all -s wasm jest",
-    "bench1": "node benchmarks/asymmetric/index.js",
-    "bench2": "node benchmarks/symmetric/index.js",
-    "bench3": "node benchmarks/hash/index.js",
-    "prebench": "npm run build",
-    "bench": "npm-run-all -s bench3 bench2 bench1",
-    "format": "prettier --write src examples/js __tests__",
+    "test": "cross-env NODE_OR_BROWSER=node npm-run-all -s build jest",
+    "format": "prettier --write src __tests__ *.ts",
     "lint": "eslint --ext .js,.ts src __tests__",
     "prepublishOnly": "npm-run-all -s lint test build",
     "preversion": "npm-run-all -s lint format",
     "docs": "typedoc --out docs --excludeInternal src/index.ts"
   },
+  "dependencies": {
+    "@deliberative/crypto": "^1.0.8",
+    "idb": "^8.0.0"
+  },
   "devDependencies": {
-    "@deliberative/crypto": "^1.0.1",
+    "@rollup/plugin-alias": "^5.1.0",
     "@rollup/plugin-commonjs": "^25.0.2",
     "@rollup/plugin-json": "^6.0.0",
     "@rollup/plugin-node-resolve": "^15.0.0",
@@ -110,6 +105,7 @@
     "terser": "^5.15.1",
     "ts-jest": "^29.0.0-next.1",
     "tslib": "^2.3.1",
+    "tweetnacl": "^1.0.3",
     "typedoc": "^0.25.0",
     "typescript": "^5.2.2"
   },

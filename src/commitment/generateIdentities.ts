@@ -1,14 +1,15 @@
 import demosMemory from "./memory";
 
-import demosMethodsModule from "../../build/demosMethodsModule";
+import libdemos from "@libdemos";
 
 import {
   crypto_sign_ed25519_PUBLICKEYBYTES,
   crypto_sign_ed25519_SECRETKEYBYTES,
-  crypto_hash_sha512_BYTES,
+  crypto_auth_hmacsha512_BYTES,
+  crypto_auth_hmacsha512_KEYBYTES,
 } from "../utils/interfaces";
 
-import type { DemosMethodsModule } from "../../build/demosMethodsModule";
+import type { LibDemos } from "@libdemos";
 
 /**
  * Verifies that the hash was indeed included in the calculation of the Merkle root.
@@ -19,38 +20,34 @@ import type { DemosMethodsModule } from "../../build/demosMethodsModule";
  */
 const generateIdentities = async (
   identitiesLen = 1,
-  nonceLen = 12,
-  module?: DemosMethodsModule,
+  module?: LibDemos,
 ): Promise<{
   nonces: Uint8Array[];
   publicKeys: Uint8Array[];
   secretKeys: Uint8Array[];
-  reversibleCommitDetails: Uint8Array;
-  irreversibleCommitDetails: Uint8Array;
+  commitDetails: Uint8Array;
 }> => {
   const wasmMemory = module
     ? module.wasmMemory
-    : demosMemory.generateCommitmentDetailsMemory(identitiesLen, nonceLen);
+    : demosMemory.generateIdentitiesMemory(identitiesLen);
   const demosModule =
     module ||
-    (await demosMethodsModule({
+    (await libdemos({
       wasmMemory,
     }));
 
   const noncesArrayLen =
-    identitiesLen * nonceLen * Uint8Array.BYTES_PER_ELEMENT;
+    identitiesLen *
+    crypto_auth_hmacsha512_KEYBYTES *
+    Uint8Array.BYTES_PER_ELEMENT;
   const ptr1 = demosModule._malloc(noncesArrayLen);
-  const noncesArray = new Uint8Array(
-    demosModule.HEAPU8.buffer,
-    ptr1,
-    noncesArrayLen,
-  );
+  const noncesArray = new Uint8Array(wasmMemory.buffer, ptr1, noncesArrayLen);
 
   const ptr2 = demosModule._malloc(
     identitiesLen * crypto_sign_ed25519_PUBLICKEYBYTES,
   );
   const publicKeysArray = new Uint8Array(
-    demosModule.HEAPU8.buffer,
+    wasmMemory.buffer,
     ptr2,
     identitiesLen * crypto_sign_ed25519_PUBLICKEYBYTES,
   );
@@ -59,33 +56,24 @@ const generateIdentities = async (
     identitiesLen * crypto_sign_ed25519_SECRETKEYBYTES,
   );
   const secretKeysArray = new Uint8Array(
-    demosModule.HEAPU8.buffer,
+    wasmMemory.buffer,
     ptr3,
     identitiesLen * crypto_sign_ed25519_SECRETKEYBYTES,
   );
 
-  const ptr4 = demosModule._malloc(2 * crypto_hash_sha512_BYTES);
-  const reversibleCommitArray = new Uint8Array(
-    demosModule.HEAPU8.buffer,
+  const ptr4 = demosModule._malloc(crypto_auth_hmacsha512_BYTES);
+  const commitDetailsArray = new Uint8Array(
+    wasmMemory.buffer,
     ptr4,
-    2 * crypto_hash_sha512_BYTES,
-  );
-
-  const ptr5 = demosModule._malloc(crypto_hash_sha512_BYTES);
-  const irreversibleCommitArray = new Uint8Array(
-    demosModule.HEAPU8.buffer,
-    ptr5,
-    crypto_hash_sha512_BYTES,
+    crypto_auth_hmacsha512_BYTES,
   );
 
   const result = demosModule._generate_identities(
     identitiesLen,
-    nonceLen,
     noncesArray.byteOffset,
     publicKeysArray.byteOffset,
     secretKeysArray.byteOffset,
-    reversibleCommitArray.byteOffset,
-    irreversibleCommitArray.byteOffset,
+    commitDetailsArray.byteOffset,
   );
 
   switch (result) {
@@ -94,8 +82,16 @@ const generateIdentities = async (
       const publicKeys: Uint8Array[] = [];
       const secretKeys: Uint8Array[] = [];
 
+      const commitDetails = Uint8Array.from([...commitDetailsArray]);
+
       for (let i = 0; i < identitiesLen; i++) {
-        nonces.push(noncesArray.slice(i * nonceLen, (i + 1) * nonceLen));
+        nonces.push(
+          noncesArray.slice(
+            i * crypto_auth_hmacsha512_KEYBYTES,
+            (i + 1) * crypto_auth_hmacsha512_KEYBYTES,
+          ),
+        );
+
         publicKeys.push(
           publicKeysArray.slice(
             i * crypto_sign_ed25519_PUBLICKEYBYTES,
@@ -103,34 +99,24 @@ const generateIdentities = async (
           ),
         );
 
-        const secretKeyArray = secretKeysArray.slice(
-          i * crypto_sign_ed25519_SECRETKEYBYTES,
-          (i + 1) * crypto_sign_ed25519_SECRETKEYBYTES,
+        secretKeys.push(
+          secretKeysArray.slice(
+            i * crypto_sign_ed25519_SECRETKEYBYTES,
+            (i + 1) * crypto_sign_ed25519_SECRETKEYBYTES,
+          ),
         );
-
-        secretKeys.push(secretKeyArray);
       }
 
       demosModule._free(ptr1);
       demosModule._free(ptr2);
       demosModule._free(ptr3);
-
-      const reversibleCommitDetails = Uint8Array.from([
-        ...reversibleCommitArray,
-      ]);
       demosModule._free(ptr4);
-
-      const irreversibleCommitDetails = Uint8Array.from([
-        ...irreversibleCommitArray,
-      ]);
-      demosModule._free(ptr5);
 
       return {
         nonces,
         publicKeys,
         secretKeys,
-        reversibleCommitDetails,
-        irreversibleCommitDetails,
+        commitDetails,
       };
     }
 
@@ -139,7 +125,6 @@ const generateIdentities = async (
       demosModule._free(ptr2);
       demosModule._free(ptr3);
       demosModule._free(ptr4);
-      demosModule._free(ptr5);
 
       throw new Error("Identities length should be at least 1.");
     }
@@ -149,9 +134,8 @@ const generateIdentities = async (
       demosModule._free(ptr2);
       demosModule._free(ptr3);
       demosModule._free(ptr4);
-      demosModule._free(ptr5);
 
-      throw new Error("Could not calculate nonce hash.");
+      throw new Error("Could not hmac of first public key with first nonce.");
     }
 
     case -3: {
@@ -159,9 +143,8 @@ const generateIdentities = async (
       demosModule._free(ptr2);
       demosModule._free(ptr3);
       demosModule._free(ptr4);
-      demosModule._free(ptr5);
 
-      throw new Error("Could not calculate public key hash.");
+      throw new Error("Could not allocate hash memory.");
     }
 
     case -4: {
@@ -169,10 +152,20 @@ const generateIdentities = async (
       demosModule._free(ptr2);
       demosModule._free(ptr3);
       demosModule._free(ptr4);
-      demosModule._free(ptr5);
 
       throw new Error(
-        "Could not calculate hash of concatenated hashed nonce and hashed public key.",
+        "Could not calculate hmac hash of previous external commit detail with current nonce.",
+      );
+    }
+
+    case -5: {
+      demosModule._free(ptr1);
+      demosModule._free(ptr2);
+      demosModule._free(ptr3);
+      demosModule._free(ptr4);
+
+      throw new Error(
+        "Could not calculate hmac hash of public key with derived nonce.",
       );
     }
 
@@ -181,7 +174,6 @@ const generateIdentities = async (
       demosModule._free(ptr2);
       demosModule._free(ptr3);
       demosModule._free(ptr4);
-      demosModule._free(ptr5);
 
       throw new Error("An unexpected error occured.");
     }

@@ -2,21 +2,25 @@ import memoryLenToPages from "../utils/memoryLenToPages";
 
 import {
   crypto_hash_sha512_BYTES,
-  crypto_sign_ed25519_BYTES,
+  crypto_auth_hmacsha512_BYTES,
   crypto_sign_ed25519_PUBLICKEYBYTES,
   crypto_sign_ed25519_SECRETKEYBYTES,
+  commitLen,
+  commitDetailsLen,
+  nonceLen,
+  getProofLen,
 } from "../utils/interfaces";
 
-const generateCommitmentDetailsMemory = (
+const generateIdentitiesMemory = (
   identitiesLen: number,
-  nonceLen: number,
 ): WebAssembly.Memory => {
   const memoryLen =
     identitiesLen *
       (nonceLen +
         crypto_sign_ed25519_PUBLICKEYBYTES +
         crypto_sign_ed25519_SECRETKEYBYTES) +
-    6 * crypto_hash_sha512_BYTES;
+    commitDetailsLen +
+    2 * crypto_hash_sha512_BYTES;
   const memoryPages = memoryLenToPages(memoryLen);
 
   return new WebAssembly.Memory({
@@ -27,15 +31,16 @@ const generateCommitmentDetailsMemory = (
 
 const generateProofMemory = (
   identitiesLen: number,
-  nonceLen: number,
-  proofLen: number,
+  identityChosenIndex: number,
 ): WebAssembly.Memory => {
+  const proofLen = getProofLen(identitiesLen, identityChosenIndex);
   const memoryLen =
-    4 +
-    (1 + identitiesLen) * crypto_hash_sha512_BYTES +
-    identitiesLen * nonceLen * Uint8Array.BYTES_PER_ELEMENT +
-    (identitiesLen + 2) * crypto_sign_ed25519_PUBLICKEYBYTES +
-    crypto_sign_ed25519_BYTES +
+    2 * crypto_auth_hmacsha512_BYTES +
+    2 * commitLen +
+    identitiesLen *
+      (nonceLen +
+        crypto_sign_ed25519_PUBLICKEYBYTES +
+        crypto_sign_ed25519_SECRETKEYBYTES) +
     proofLen * Uint8Array.BYTES_PER_ELEMENT;
   const memoryPages = memoryLenToPages(memoryLen);
 
@@ -47,10 +52,9 @@ const generateProofMemory = (
 
 const verifyProofMemory = (proofLen: number): WebAssembly.Memory => {
   const memoryLen =
-    proofLen * Uint8Array.BYTES_PER_ELEMENT +
-    5 * crypto_hash_sha512_BYTES +
-    crypto_sign_ed25519_BYTES +
-    crypto_sign_ed25519_PUBLICKEYBYTES;
+    2 * crypto_hash_sha512_BYTES +
+    commitLen +
+    proofLen * Uint8Array.BYTES_PER_ELEMENT;
   const memoryPages = memoryLenToPages(memoryLen);
 
   return new WebAssembly.Memory({
@@ -59,15 +63,15 @@ const verifyProofMemory = (proofLen: number): WebAssembly.Memory => {
   });
 };
 
-const commitMemory = (detailsLen: number): WebAssembly.Memory => {
-  const memoryLen = detailsLen + 3 * crypto_hash_sha512_BYTES;
+const commitMemory = (): WebAssembly.Memory => {
+  const memoryLen = 5 * crypto_hash_sha512_BYTES + commitDetailsLen;
   const pages = memoryLenToPages(memoryLen);
 
   return new WebAssembly.Memory({ initial: pages, maximum: pages });
 };
 
 export default {
-  generateCommitmentDetailsMemory,
+  generateIdentitiesMemory,
   generateProofMemory,
   verifyProofMemory,
   commitMemory,

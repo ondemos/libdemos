@@ -1,55 +1,68 @@
-import dcrypto from "@deliberative/crypto";
+import ondemos from "../src";
 
-import dcommitment from "../src";
+const uint8ToHex = (array: Uint8Array) => {
+  return (
+    "0x" +
+    array.reduce((str, byte) => str + byte.toString(16).padStart(2, "0"), "")
+  );
+};
 
 describe("Commitment scheme test suite.", () => {
   test("Generating commitment details works.", async () => {
-    const initialCommit = await dcrypto.randomBytes(
-      dcrypto.constants.crypto_hash_sha512_BYTES,
+    const initialCommit = await ondemos.randomBytes(
+      ondemos.constants.crypto_hash_sha512_BYTES,
     );
 
-    console.log(initialCommit);
+    console.log(uint8ToHex(initialCommit));
 
-    const newIdentities = await dcommitment.generateIdentities(4);
+    const newIdentities = await ondemos.generateIdentities(100);
 
-    console.log(newIdentities);
+    // console.log(newIdentities);
 
-    const committed1 = await dcommitment.commit(
-      newIdentities.irreversibleCommitDetails,
+    const commit = await ondemos.commit(
+      newIdentities.commitDetails,
       initialCommit,
     );
 
-    const committed2 = await dcommitment.commit(
-      newIdentities.reversibleCommitDetails,
-      initialCommit,
-    );
+    console.log(uint8ToHex(commit));
 
-    expect(committed1).toStrictEqual(committed2);
+    const chosenIdentity1 = 68;
+    const chosenIdentity2 = 52;
 
-    console.log(committed1);
-
-    const proof1 = await dcommitment.generateProof(
-      committed1,
+    const proof1 = await ondemos.generateProof(
+      chosenIdentity1,
+      commit,
       initialCommit,
       newIdentities.nonces,
       newIdentities.publicKeys,
-      newIdentities.secretKeys[3],
+      newIdentities.secretKeys,
     );
 
-    const proof2 = await dcommitment.generateProof(
-      committed1,
+    const proof2 = await ondemos.generateProof(
+      chosenIdentity2,
+      commit,
       initialCommit,
       newIdentities.nonces,
       newIdentities.publicKeys,
-      newIdentities.secretKeys[0],
+      newIdentities.secretKeys,
     );
+
+    expect(proof1.length).toBeLessThan(proof2.length);
 
     console.log(proof1);
     console.log(proof2);
 
-    const identityDistanceFromCommit1 = await dcommitment.verifyProof(committed1, proof1);
-    const identityDistanceFromCommit2 = await dcommitment.verifyProof(committed2, proof2);
+    const identityDistanceFromCommit1 = await ondemos.verifyProof(
+      commit,
+      proof1,
+    );
+    const identityDistanceFromCommit2 = await ondemos.verifyProof(
+      commit,
+      proof2,
+    );
 
-    expect(identityDistanceFromCommit1).toBeLessThan(identityDistanceFromCommit2);
+    expect(identityDistanceFromCommit1).toBeLessThan(
+      identityDistanceFromCommit2,
+    );
   });
 });

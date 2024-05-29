@@ -1,12 +1,19 @@
 /// <reference types="emscripten" />
 
-export interface DemosMethodsModule extends EmscriptenModule {
+export interface LibDemos extends EmscriptenModule {
   wasmMemory: WebAssembly.Memory;
 
   _sha512(
     DATA_LEN: number,
-    data: number, // Uint8Array, // byteOffset
-    hash: number, // Uint8Array
+    data: number,
+    hash: number
+  ): number;
+
+  _argon2(
+    MNEMONIC_LEN: number,
+    seed: number,
+    mnemonic: number,
+    salt: number
   ): number;
 
   _keypair(
@@ -14,18 +21,65 @@ export interface DemosMethodsModule extends EmscriptenModule {
     secret_key: number, // Uint8Array
   ): number;
 
+  _keypair_from_seed(
+    public_key: number, // Uint8Array,
+    secret_key: number, // Uint8Array,
+    seed: number, // Uint8Array,
+  ): number;
+  _keypair_from_secret_key(
+    public_key: number, // Uint8Array,
+    secret_key: number, // Uint8Array,
+  ): number;
+
   _sign(
-    signature: number, // Uint8Array,
     DATA_LEN: number,
     data: number, // Uint8Array,
-    SECRET_KEY_LEN: number,
     secret_key: number, // Uint8Array,
+    signature: number, // Uint8Array,
   ): number;
   _verify(
     DATA_LEN: number,
     data: number, // Uint8Array,
-    signature: number, // Uint8Array,
     public_key: number, // Uint8Array,
+    signature: number, // Uint8Array,
+  ): number;
+
+  _encrypt_chachapoly_asymmetric(
+    DATA_LEN: number,
+    data: number, // Uint8Array,
+    public_key: number, // Uint8Array,
+    secret_key: number, // Uint8Array,
+    ADDITIONAL_DATA_LEN: number,
+    additional_data: number, // Uint8Array,
+    encrypted: number, // Uint8Array,
+  ): number;
+  
+  _decrypt_chachapoly_asymmetric(
+    ENCRYPTED_LEN: number,
+    encrypted_data: number, // Uint8Array,
+    public_key: number, // Uint8Array,
+    secret_key: number, // Uint8Array,
+    ADDITIONAL_DATA_LEN: number,
+    additional_data: number, // Uint8Array,
+    data: number, // Uint8Array,
+  ): number;
+
+  _encrypt_chachapoly_symmetric(
+    DATA_LEN: number, 
+    data: number,
+    key: number,
+    ADDITIONAL_DATA_LEN: number,
+    additional_data: number,
+    encrypted: number,
+  ): number;
+
+  _decrypt_chachapoly_symmetric(
+    ENCRYPTED_LEN: number,
+    encrypted_data: number, // Uint8Array,
+    key: number, // Uint8Array,
+    ADDITIONAL_DATA_LEN: number,
+    additional_data: number, // Uint8Array,
+    data: number, // Uint8Array,
   ): number;
 
   _split_secret(
@@ -45,6 +99,10 @@ export interface DemosMethodsModule extends EmscriptenModule {
   _random_bytes(
     SIZE: number,
     array: number, // Uint8Array
+  ): number;
+  _random_number_in_range(
+    MIN: number,
+    MAX: number,
   ): number;
 
   _get_merkle_root(
@@ -73,19 +131,12 @@ export interface DemosMethodsModule extends EmscriptenModule {
 
   _generate_identities(
     IDENTITIES_LEN: number,
-    NONCE_LEN: number,
     nonces: number,
     public_keys: number,
     secret_keys: number,
-    reversible_details: number,
-    irreversible_details: number,
+    commit_details: number,
   ): number;
-  _commitment_update_reversible(
-    updatedCommit: number,
-    previousCommit: number,
-    details: number,
-  ): number;
-  _commitment_update_irreversible(
+  _commit(
     updatedCommit: number,
     previousCommit: number,
     details: number,
@@ -93,8 +144,7 @@ export interface DemosMethodsModule extends EmscriptenModule {
   _generate_proof(
     PROOF_LEN: number,
     IDENTITIES_LEN: number,
-    NONCE_LEN: number,
-    commitment: number,
+    currentCommit: number,
     previousCommit: number,
     nonces: number,
     public_keys: number,
@@ -103,10 +153,10 @@ export interface DemosMethodsModule extends EmscriptenModule {
   ): number;
   _verify_proof(
     PROOF_LEN: number,
-    commitment: number, // Uint8Array.byteOffset
+    currentCommit: number, // Uint8Array.byteOffset
     proof: number, // Uint8Array.byteOffset
   ): number;
 }
 
-declare const demosMethodsModule: EmscriptenModuleFactory<DemosMethodsModule>;
-export default demosMethodsModule;
+declare const libdemos: EmscriptenModuleFactory<LibDemos>;
+export default libdemos;

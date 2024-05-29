@@ -20,8 +20,11 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
-    "noFallthroughCasesInSwitch": true
+    "noFallthroughCasesInSwitch": true,
+    "paths": {
+      "@libdemos": ["./wasm/node/libdemos"]
+    }
   },
-  "include": ["src", "__tests__", "__specs__", "playwright.config.ts", "rollup.config.ts"],
+  "include": ["src", "__tests__"],
   "exclude": ["node_modules"]
 }

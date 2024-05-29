@@ -20,6 +20,9 @@
     "<rootDir>/src/wasmLoaders/emscriptenImports.ts",
     "<rootDir>/src/c/build/dcryptoMethodsModule.d.ts"
   ],
+  "moduleNameMapper": {
+    "^@libdemos(.*)$": "<rootDir>/wasm/node/libdemos"
+  }, 
   "coverageReporters": ["json", "text", "lcov", "jest-badges"],
   "coverageDirectory": "coverage",
   "errorOnDeprecated": true
