@@ -1,5 +1,4 @@
 #include <stdbool.h>
-#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -31,7 +30,6 @@ verify_proof(const unsigned int PROOF_LEN,
   const unsigned int IDENTITIES_LEN = IDENTITIES_DETAILS_LEN
                                       / (crypto_sign_ed25519_PUBLICKEYBYTES
                                          + crypto_auth_hmacsha512_KEYBYTES);
-  printf("Identities len is %d\n", IDENTITIES_LEN);
 
   if (PROOF_LEN > crypto_hash_sha512_BYTES
                       + IDENTITIES_LEN

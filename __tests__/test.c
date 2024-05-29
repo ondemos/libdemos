@@ -108,7 +108,7 @@ main()
 
   printf("Allocated space for initial commit\n");
 
-  randombytes_buf(initial_commit, crypto_hash_sha512_BYTES);
+  random_bytes(crypto_hash_sha512_BYTES, initial_commit);
 
   res = commit(current_commit, initial_commit, commit_details);
   free(commit_details);

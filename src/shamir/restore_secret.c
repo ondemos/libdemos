@@ -1,4 +1,7 @@
-#include "./shamir.h"
+#include <stdlib.h>
+#include <string.h>
+
+#include "shamir.h"
 
 int
 restore_secret(const unsigned int SHARES_LEN, const unsigned int SECRET_LEN,

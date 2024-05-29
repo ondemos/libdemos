@@ -13,29 +13,41 @@
 #include "../../libsodium/src/libsodium/include/sodium/crypto_scalarmult_curve25519.h"
 #include "../../libsodium/src/libsodium/include/sodium/crypto_sign_ed25519.h"
 
-#define ENCRYPTED_LEN(DATA_LEN)                                                \
-  crypto_scalarmult_curve25519_BYTES                                           \
-      + crypto_aead_chacha20poly1305_ietf_NPUBBYTES + DATA_LEN                 \
-      + crypto_aead_chacha20poly1305_ietf_ABYTES
+int encrypt_chachapoly_asymmetric(
+    const unsigned int DATA_LEN, const uint8_t data[DATA_LEN],
+    const uint8_t receiver_public_key[crypto_sign_ed25519_PUBLICKEYBYTES],
+    const uint8_t sender_secret_key[crypto_sign_ed25519_SECRETKEYBYTES],
+    const unsigned int ADDITIONAL_DATA_LEN,
+    const uint8_t additional_data[ADDITIONAL_DATA_LEN],
+    uint8_t encrypted[crypto_scalarmult_curve25519_BYTES
+                      + crypto_aead_chacha20poly1305_ietf_NPUBBYTES + DATA_LEN
+                      + crypto_aead_chacha20poly1305_ietf_ABYTES]);
 
-#define DECRYPTED_LEN(ENCRYPTED_LEN)                                           \
-  ENCRYPTED_LEN - crypto_aead_chacha20poly1305_ietf_NPUBBYTES                  \
-      - crypto_aead_chacha20poly1305_ietf_ABYTES
-
-int
-encrypt_chachapoly(const unsigned int DATA_LEN, const uint8_t data[DATA_LEN],
-                   const uint8_t public_key[crypto_sign_ed25519_PUBLICKEYBYTES],
-                   const uint8_t secret_key[crypto_sign_ed25519_SECRETKEYBYTES],
-                   const unsigned int ADDITIONAL_DATA_LEN,
-                   const uint8_t additional_data[ADDITIONAL_DATA_LEN],
-                   uint8_t encrypted[ENCRYPTED_LEN(DATA_LEN)]);
-
-int decrypt_chachapoly(
+int decrypt_chachapoly_asymmetric(
     const unsigned int ENCRYPTED_LEN,
     const uint8_t encrypted_data[ENCRYPTED_LEN],
+    const uint8_t sender_public_key[crypto_sign_ed25519_PUBLICKEYBYTES],
     const uint8_t receiver_secret_key[crypto_sign_ed25519_SECRETKEYBYTES],
     const unsigned int ADDITIONAL_DATA_LEN,
     const uint8_t additional_data[ADDITIONAL_DATA_LEN],
-    uint8_t data[DECRYPTED_LEN(ENCRYPTED_LEN)]);
+    uint8_t data[ENCRYPTED_LEN - crypto_aead_chacha20poly1305_ietf_NPUBBYTES
+                 - crypto_aead_chacha20poly1305_ietf_ABYTES]);
+
+int encrypt_chachapoly_symmetric(
+    const unsigned int DATA_LEN, const uint8_t data[DATA_LEN],
+    const uint8_t key[crypto_kx_SESSIONKEYBYTES],
+    const unsigned int ADDITIONAL_DATA_LEN,
+    const uint8_t additional_data[ADDITIONAL_DATA_LEN],
+    uint8_t encrypted[crypto_aead_chacha20poly1305_ietf_NPUBBYTES + DATA_LEN
+                      + crypto_aead_chacha20poly1305_ietf_ABYTES]);
+
+int decrypt_chachapoly_symmetric(
+    const unsigned int ENCRYPTED_LEN,
+    const uint8_t encrypted_data[ENCRYPTED_LEN],
+    const uint8_t key[crypto_kx_SESSIONKEYBYTES],
+    const unsigned int ADDITIONAL_DATA_LEN,
+    const uint8_t additional_data[ADDITIONAL_DATA_LEN],
+    uint8_t data[ENCRYPTED_LEN - crypto_aead_chacha20poly1305_ietf_NPUBBYTES
+                 - crypto_aead_chacha20poly1305_ietf_ABYTES]);
 
 #endif

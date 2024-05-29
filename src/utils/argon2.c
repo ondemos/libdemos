@@ -1,4 +1,4 @@
-#include "./utils.h"
+#include "utils.h"
 
 int
 argon2(const unsigned int MNEMONIC_LEN,

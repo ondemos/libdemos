@@ -3,6 +3,7 @@
 #include "./ed25519.c"
 #include "./items_indexes_in_array.c"
 #include "./number_to_uint8_array.c"
+#include "./random_bytes.c"
 #include "./random_number_in_range.c"
 #include "./sha512.c"
 #include "./uint256.c"

@@ -36,7 +36,6 @@ const {
   libsodiumArgon4,
   libsodiumArgon5,
   libsodiumArgon6,
-  libsodiumRandomBytesPath,
 } = require("./paths")
 
 const buildPath = path.join(
@@ -90,8 +89,8 @@ const browser =
 const memory = `\
 -s IMPORTED_MEMORY=1 \
 -s ALLOW_MEMORY_GROWTH=1 \
--s INITIAL_MEMORY=${process.env.NODE_ENV === "production" ? "256kb" : "10mb" } \
--s STACK_SIZE=${process.env.NODE_ENV === "production" ? "128kb" : "5mb" } \
+-s INITIAL_MEMORY=${process.env.NODE_ENV === "production" ? "512kb" : "10mb" } \
+-s STACK_SIZE=${process.env.NODE_ENV === "production" ? "256kb" : "5mb" } \
 -s MALLOC=emmalloc-memvalidate \
 -s MEMORY_GROWTH_LINEAR_STEP=128kb \
 -s GLOBAL_BASE=4096 \
@@ -151,8 +150,10 @@ _malloc,\
 _free,\
 _sign,\
 _verify,\
-_encrypt_chachapoly,\
-_decrypt_chachapoly,\
+_encrypt_chachapoly_asymmetric,\
+_decrypt_chachapoly_asymmetric,\
+_encrypt_chachapoly_symmetric,\
+_decrypt_chachapoly_symmetric,\
 _commit,\
 _generate_proof,\
 _generate_identities,\
@@ -168,6 +169,7 @@ _get_merkle_proof,\
 _get_merkle_root,\
 _get_merkle_root_from_proof,\
 _verify_merkle_proof,\
+_random_bytes,\
 _random_number_in_range \
 -s EXPORT_NAME=libdemos \
 -I${libsodiumIncludePath} \
@@ -177,7 +179,6 @@ ${methodsPath} \
 ${libsodiumCorePath} \
 ${libsodiumCodecsPath} \
 ${libsodiumUtilsPath} \
-${libsodiumRandomBytesPath} \
 ${libsodiumHashPath} \
 ${libsodiumEd255191} \
 ${libsodiumEd255192} \

@@ -18,9 +18,9 @@ const libsodiumSodiumPath = path.join(libsodiumPath, "sodium");
 const libsodiumCodecsPath = path.join(libsodiumSodiumPath, "codecs.c");
 const libsodiumCorePath = path.join(libsodiumSodiumPath, "core.c");
 const libsodiumUtilsPath = path.join(libsodiumSodiumPath, "utils.c");
-const libsodiumRandomBytesPath = path.join(libsodiumPath, "randombytes", "randombytes.c");
+// const libsodiumRandomBytesPath = path.join(libsodiumPath, "randombytes", "randombytes.c");
 
-// const libsodiumRandomBytesPath = path.join(srcPath, "utils", "random_bytes.c");
+const libsodiumRandomBytesPath = path.join(srcPath, "utils", "random_bytes.c");
 
 const libsodiumHashPath = path.join(libsodiumPath, "crypto_hash", "sha512", "cp", "hash_sha512_cp.c");
 

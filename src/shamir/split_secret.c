@@ -1,6 +1,7 @@
-#include "./shamir.h"
+#include <stdlib.h>
 
-#include "../../libsodium/src/libsodium/include/sodium/randombytes.h"
+#include "../utils/utils.h"
+#include "shamir.h"
 
 int
 split_secret(const unsigned int SHARES_LEN, const unsigned int THRESHOLD,
@@ -18,7 +19,7 @@ split_secret(const unsigned int SHARES_LEN, const unsigned int THRESHOLD,
 
   for (i = 0; i < SECRET_LEN; i++)
   {
-    randombytes_buf(coefficients, THRESHOLD);
+    random_bytes(THRESHOLD, coefficients);
     coefficients[0] = secret[i];
 
     for (j = 0; j < SHARES_LEN; j++)

@@ -44,7 +44,7 @@ export interface LibDemos extends EmscriptenModule {
     signature: number, // Uint8Array,
   ): number;
 
-  _encrypt_chachapoly(
+  _encrypt_chachapoly_asymmetric(
     DATA_LEN: number,
     data: number, // Uint8Array,
     public_key: number, // Uint8Array,
@@ -54,10 +54,29 @@ export interface LibDemos extends EmscriptenModule {
     encrypted: number, // Uint8Array,
   ): number;
   
-  _decrypt_chachapoly(
+  _decrypt_chachapoly_asymmetric(
     ENCRYPTED_LEN: number,
     encrypted_data: number, // Uint8Array,
+    public_key: number, // Uint8Array,
     secret_key: number, // Uint8Array,
+    ADDITIONAL_DATA_LEN: number,
+    additional_data: number, // Uint8Array,
+    data: number, // Uint8Array,
+  ): number;
+
+  _encrypt_chachapoly_symmetric(
+    DATA_LEN: number, 
+    data: number,
+    key: number,
+    ADDITIONAL_DATA_LEN: number,
+    additional_data: number,
+    encrypted: number,
+  ): number;
+
+  _decrypt_chachapoly_symmetric(
+    ENCRYPTED_LEN: number,
+    encrypted_data: number, // Uint8Array,
+    key: number, // Uint8Array,
     ADDITIONAL_DATA_LEN: number,
     additional_data: number, // Uint8Array,
     data: number, // Uint8Array,

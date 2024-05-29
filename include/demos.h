@@ -16,26 +16,12 @@ extern "C"
 #include "../libsodium/src/libsodium/include/sodium/crypto_aead_chacha20poly1305.h"
 #include "../libsodium/src/libsodium/include/sodium/crypto_auth_hmacsha512.h"
 #include "../libsodium/src/libsodium/include/sodium/crypto_hash_sha512.h"
+#include "../libsodium/src/libsodium/include/sodium/crypto_kx.h"
 #include "../libsodium/src/libsodium/include/sodium/crypto_pwhash_argon2id.h"
 #include "../libsodium/src/libsodium/include/sodium/crypto_scalarmult_curve25519.h"
 #include "../libsodium/src/libsodium/include/sodium/crypto_sign_ed25519.h"
 
-#define DETAILS_LEN                                                            \
-  crypto_sign_ed25519_PUBLICKEYBYTES + crypto_auth_hmacsha512_KEYBYTES
-
-#define MIN_PROOF_LEN                                                          \
-  crypto_hash_sha512_BYTES + DETAILS_LEN + crypto_sign_ed25519_BYTES
-
-#define MAX_PROOF_LEN(IDENTITIES_LEN)                                          \
-  crypto_hash_sha512_BYTES + IDENTITIES_LEN *DETAILS_LEN                       \
-      + crypto_sign_ed25519_BYTES
-
-#define CALCULATED_PROOF_LEN(IDENTITIES_LEN, IDENTITY_INDEX_USED)              \
-  crypto_hash_sha512_BYTES                                                     \
-      + (IDENTITIES_LEN - IDENTITY_INDEX_USED) * DETAILS_LEN                   \
-      + crypto_sign_ed25519_BYTES
-
-  DEMOS_PUBLIC void randombytes_buf(void *const buf, const size_t size);
+  DEMOS_PUBLIC int random_bytes(const unsigned int SIZE, uint8_t array[SIZE]);
 
   DEMOS_PUBLIC int random_number_in_range(const int MIN, const int MAX);
 
@@ -71,7 +57,7 @@ extern "C"
          const uint8_t public_key[crypto_sign_ed25519_PUBLICKEYBYTES],
          const uint8_t signature[crypto_sign_ed25519_BYTES]);
 
-  DEMOS_PUBLIC int encrypt_chachapoly(
+  DEMOS_PUBLIC int encrypt_chachapoly_asymmetric(
       const unsigned int DATA_LEN, const uint8_t data[DATA_LEN],
       const uint8_t receiver_public_key[crypto_sign_ed25519_PUBLICKEYBYTES],
       const uint8_t sender_secret_key[crypto_sign_ed25519_SECRETKEYBYTES],
@@ -81,7 +67,7 @@ extern "C"
                         + crypto_aead_chacha20poly1305_ietf_NPUBBYTES + DATA_LEN
                         + crypto_aead_chacha20poly1305_ietf_ABYTES]);
 
-  DEMOS_PUBLIC int decrypt_chachapoly(
+  DEMOS_PUBLIC int decrypt_chachapoly_asymmetric(
       const unsigned int ENCRYPTED_LEN,
       const uint8_t encrypted_data[ENCRYPTED_LEN],
       const uint8_t receiver_secret_key[crypto_sign_ed25519_SECRETKEYBYTES],
@@ -89,6 +75,25 @@ extern "C"
       const uint8_t additional_data[ADDITIONAL_DATA_LEN],
       uint8_t data[ENCRYPTED_LEN - crypto_scalarmult_curve25519_BYTES
                    - crypto_aead_chacha20poly1305_ietf_NPUBBYTES
+                   - crypto_aead_chacha20poly1305_ietf_ABYTES]);
+
+  DEMOS_PUBLIC
+  int encrypt_chachapoly_symmetric(
+      const unsigned int DATA_LEN, const uint8_t data[DATA_LEN],
+      const uint8_t key[crypto_kx_SESSIONKEYBYTES],
+      const unsigned int ADDITIONAL_DATA_LEN,
+      const uint8_t additional_data[ADDITIONAL_DATA_LEN],
+      uint8_t encrypted[crypto_aead_chacha20poly1305_ietf_NPUBBYTES + DATA_LEN
+                        + crypto_aead_chacha20poly1305_ietf_ABYTES]);
+
+  DEMOS_PUBLIC
+  int decrypt_chachapoly_symmetric(
+      const unsigned int ENCRYPTED_LEN,
+      const uint8_t encrypted_data[ENCRYPTED_LEN],
+      const uint8_t key[crypto_kx_SESSIONKEYBYTES],
+      const unsigned int ADDITIONAL_DATA_LEN,
+      const uint8_t additional_data[ADDITIONAL_DATA_LEN],
+      uint8_t data[ENCRYPTED_LEN - crypto_aead_chacha20poly1305_ietf_NPUBBYTES
                    - crypto_aead_chacha20poly1305_ietf_ABYTES]);
 
   DEMOS_PUBLIC int generate_identities(

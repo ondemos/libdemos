@@ -1,4 +1,4 @@
-#include "./utils.h"
+#include "utils.h"
 
 int
 uint8_array_to_number(const uint8_t array[UINT8_NUMBER_LEN])

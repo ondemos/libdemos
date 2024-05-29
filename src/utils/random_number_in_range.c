@@ -1,6 +1,6 @@
-#include "./utils.h"
+#include <math.h>
 
-#include "../../libsodium/src/libsodium/include/sodium/randombytes.h"
+#include "utils.h"
 
 int
 random_number_in_range(const int MIN, const int MAX)
@@ -18,7 +18,7 @@ random_number_in_range(const int MIN, const int MAX)
   int randomInteger = EXTENDED_RANGE;
   while (randomInteger >= EXTENDED_RANGE)
   {
-    randombytes_buf(randomBytes, BYTES_NEEDED);
+    random_bytes(BYTES_NEEDED, randomBytes);
 
     randomInteger = 0;
     for (i = 0; i < BYTES_NEEDED; i++)

@@ -2,8 +2,7 @@
 #include <string.h>
 
 #include "demos.h"
-
-#include "../libsodium/src/libsodium/include/sodium/randombytes.h"
+#include "utils/utils.h"
 
 /**
  * Reversible and irreversible have the same length so that
@@ -19,7 +18,7 @@ generate_identities(
 {
   if (IDENTITIES_LEN < 1) return -1;
 
-  randombytes_buf(nonces[0], crypto_auth_hmacsha512_KEYBYTES);
+  random_bytes(crypto_auth_hmacsha512_KEYBYTES, nonces[0]);
   crypto_sign_ed25519_keypair(public_keys[0], secret_keys[0]);
 
   int res
@@ -37,7 +36,7 @@ generate_identities(
     // Populate random nonces and public/secret keypairs
     for (size_t i = 1; i < IDENTITIES_LEN; i++)
     {
-      randombytes_buf(nonces[i], crypto_auth_hmacsha512_KEYBYTES);
+      random_bytes(crypto_auth_hmacsha512_KEYBYTES, nonces[i]);
       crypto_sign_ed25519_keypair(public_keys[i], secret_keys[i]);
 
       // For the external details we calculate the nonce differently

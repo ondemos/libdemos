@@ -1,4 +1,6 @@
-#include "./utils.h"
+#include <string.h>
+
+#include "utils.h"
 
 int
 keypair(uint8_t public_key[crypto_sign_ed25519_PUBLICKEYBYTES],

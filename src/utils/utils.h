@@ -1,28 +1,15 @@
 #ifndef utils_H
 #define utils_H
 
-#include <assert.h>
-#include <limits.h>
-#include <math.h>
 #include <stdbool.h>
-#include <stdint.h>
-#include <stdlib.h>
-#include <string.h>
-
-#include "./uint256.h"
 
 #include "../../libsodium/src/libsodium/include/sodium/crypto_aead_chacha20poly1305.h"
-#include "../../libsodium/src/libsodium/include/sodium/crypto_auth_hmacsha512.h"
 #include "../../libsodium/src/libsodium/include/sodium/crypto_hash_sha512.h"
 #include "../../libsodium/src/libsodium/include/sodium/crypto_pwhash_argon2id.h"
 #include "../../libsodium/src/libsodium/include/sodium/crypto_sign_ed25519.h"
-#include "../../libsodium/src/libsodium/include/sodium/utils.h"
 
 #define UINT8_NUMBER_LEN 4
 #define UINT8_BIGINT_LEN 8
-
-int calculate_proof_len(const unsigned int IDENTITIES_LEN,
-                        const unsigned int IDENTITY_INDEX_USED);
 
 void items_indexes_in_array(
     const size_t ARRAY_LEN, const size_t ITEMS_ARRAY_LEN,
@@ -34,6 +21,8 @@ int uint8_array_to_number(const uint8_t array[UINT8_NUMBER_LEN]);
 
 void number_to_uint8_array(const unsigned long number,
                            uint8_t array[UINT8_NUMBER_LEN]);
+
+int random_bytes(const unsigned int SIZE, uint8_t array[SIZE]);
 
 int random_number_in_range(const int MIN, const int MAX);
 

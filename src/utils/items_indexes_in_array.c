@@ -1,4 +1,4 @@
-#include "./utils.h"
+#include "utils.h"
 
 // Output is an array of indexes of the elements
 void

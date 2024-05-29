@@ -1,6 +1,8 @@
-#include "./utils.h"
+#include <string.h>
 
-#include "../../libsodium/src/libsodium/include/sodium/randombytes.h"
+#include "utils.h"
+
+#include "../../libsodium/src/libsodium/include/sodium/utils.h"
 
 void
 calculate_nonce(uint8_t nonce[crypto_aead_chacha20poly1305_ietf_NPUBBYTES])
@@ -9,7 +11,7 @@ calculate_nonce(uint8_t nonce[crypto_aead_chacha20poly1305_ietf_NPUBBYTES])
       = sodium_malloc(sizeof(uint8_t[crypto_hash_sha512_BYTES]));
   if (nonce_random_vector != NULL)
   {
-    randombytes_buf(nonce_random_vector, crypto_hash_sha512_BYTES);
+    random_bytes(crypto_hash_sha512_BYTES, nonce_random_vector);
 
     uint8_t *nonce_sha512 = malloc(sizeof(uint8_t[crypto_hash_sha512_BYTES]));
     if (nonce_sha512 != NULL)

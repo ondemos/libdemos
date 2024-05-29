@@ -1,4 +1,4 @@
-#include "./utils.h"
+#include "utils.h"
 
 void
 number_to_uint8_array(const unsigned long number,
