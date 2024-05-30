@@ -1,4 +1,4 @@
-# Welcome to @deliberative/crypto contributing guide <!-- omit in toc -->
+# Welcome to @ondemos/core-js contributing guide <!-- omit in toc -->
 
 Thank you for investing your time in contributing to our project! Any contribution you make will be reflected on the project's GitHub homepage :sparkles:.
 
@@ -17,12 +17,12 @@ To get an overview of the project, read the [README](README.md). Here are some r
 
 ## Getting started
 
-To get started you need to have [nodejs](https://github.com/nodejs/node) and [emsdk](https://github.com/emscripten-core/emsdk) installed on your machine and in your path.
+To get started you need to have [nodejs](https://github.com/nodejs/node) installed on your machine and in your path.
 You also need to clone this repository and its submodule in order to be able to compile the library
 
 ```
-git clone git@github.com:deliberative/crypto.git dcrypto
-cd dcrypto
+git clone git@github.com:ondemos/core-js.git ondemos-js 
+cd ondemos-js
 npm i
 git submodule update --init --recursive
 ```
@@ -38,7 +38,7 @@ npm test
 
 #### Create a new issue
 
-If you spot a problem with the code, [search if an issue already exists](https://github.com/deliberative/crypto/issues). If a related issue doesn't exist,
+If you spot a problem with the code, [search if an issue already exists](https://github.com/ondemos/core-js/issues). If a related issue doesn't exist,
 you can open a new issue by pasting the relevant output of your terminal.
 
 #### Solve an issue
@@ -90,6 +90,6 @@ When you're finished with the changes, create a pull request, also known as a PR
 
 ### Your PR is merged!
 
-Congratulations :tada::tada: The @deliberative team thanks you :sparkles:.
+Congratulations :tada::tada: The @ondemos team thanks you :sparkles:.
 
 Once your PR is merged, your contributions will be publicly visible.

@@ -3,16 +3,15 @@ import merkle from "./merkle";
 import shamir from "./shamir";
 import utils from "./utils";
 
-import type { SignKeyPair, Proof } from "./utils/interfaces";
-
 import libdemos from "@libdemos";
+
+import type { SignKeyPair, Proof } from "./utils/interfaces";
 
 const ondemos = {
   generateIdentities: commitment.generateIdentities,
   generateProof: commitment.generateProof,
   commit: commitment.commit,
   verifyProof: commitment.verifyProof,
-
   randomBytes: utils.randomBytes,
   randomShuffle: utils.arrayRandomShuffle,
   randomSubset: utils.arrayRandomSubset,
@@ -32,15 +31,12 @@ const ondemos = {
   keyPairFromMnemonic: utils.keyPairFromMnemonic,
   validateMnemonic: utils.validateMnemonic,
   wordlist: utils.wordlist,
-
   getMerkleRoot: merkle.getMerkleRoot,
   getMerkleProof: merkle.getMerkleProof,
   getMerkleRootFromProof: merkle.getMerkleRootFromProof,
   verifyMerkleProof: merkle.verifyMerkleProof,
-
   splitSecret: shamir.splitSecret,
   restoreSecret: shamir.restoreSecret,
-
   loadWasmModule: libdemos,
   loadWasmMemory: {
     generateIdentities: commitment.memory.generateIdentitiesMemory,
@@ -60,7 +56,6 @@ const ondemos = {
     encryptSymmetric: utils.memory.encryptSymmetricMemory,
     decryptSymmetric: utils.memory.decryptSymmetricMemory,
   },
-
   constants: {
     commit_BYTES: utils.interfaces.commitLen,
     commit_details_BYTES: utils.interfaces.commitDetailsLen,
@@ -75,6 +70,8 @@ const ondemos = {
       utils.interfaces.crypto_box_x25519_SECRETKEYBYTES,
     crypto_box_x25519_NONCEBYTES: utils.interfaces.crypto_box_x25519_NONCEBYTES,
     crypto_kx_SESSIONKEYBYTES: utils.interfaces.crypto_kx_SESSIONKEYBYTES,
+    crypto_aead_chacha20poly1305_ietf_KEYBYTES:
+      utils.interfaces.crypto_aead_chacha20poly1305_ietf_KEYBYTES,
     crypto_sign_ed25519_BYTES: utils.interfaces.crypto_sign_ed25519_BYTES,
     crypto_sign_ed25519_SEEDBYTES:
       utils.interfaces.crypto_sign_ed25519_SEEDBYTES,

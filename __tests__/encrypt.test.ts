@@ -2,7 +2,7 @@ import ondemos from "../src";
 
 import {
   crypto_hash_sha512_BYTES,
-  crypto_kx_SESSIONKEYBYTES,
+  crypto_aead_chacha20poly1305_ietf_KEYBYTES,
 } from "../src/utils/interfaces";
 
 const arraysAreEqual = (arr1: Uint8Array, arr2: Uint8Array): boolean => {
@@ -78,7 +78,9 @@ describe("Encryption and decryption with symmetric key test suite.", () => {
 
   test("Encryption and decryption with provided key work.", async () => {
     const message = await ondemos.randomBytes(32);
-    const key = await ondemos.randomBytes(crypto_kx_SESSIONKEYBYTES);
+    const key = await ondemos.randomBytes(
+      crypto_aead_chacha20poly1305_ietf_KEYBYTES,
+    );
 
     const previousBlockHash = await ondemos.randomBytes(
       crypto_hash_sha512_BYTES,
@@ -132,7 +134,9 @@ describe("Encryption and decryption with symmetric key test suite.", () => {
 
   it("Should be impossible to decrypt with wrong key", async () => {
     const message = await ondemos.randomBytes(32);
-    const key = await ondemos.randomBytes(crypto_kx_SESSIONKEYBYTES);
+    const key = await ondemos.randomBytes(
+      crypto_aead_chacha20poly1305_ietf_KEYBYTES,
+    );
 
     const previousBlockHash = await ondemos.randomBytes(
       crypto_hash_sha512_BYTES,
@@ -143,7 +147,9 @@ describe("Encryption and decryption with symmetric key test suite.", () => {
       previousBlockHash,
     );
 
-    const anotherKey = await ondemos.randomBytes(crypto_kx_SESSIONKEYBYTES);
+    const anotherKey = await ondemos.randomBytes(
+      crypto_aead_chacha20poly1305_ietf_KEYBYTES,
+    );
 
     await expect(
       ondemos.decryptSymmetric(encrypted, anotherKey, previousBlockHash),

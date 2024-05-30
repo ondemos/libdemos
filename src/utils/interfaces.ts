@@ -24,6 +24,8 @@ export const crypto_box_x25519_SECRETKEYBYTES =
   32 * Uint8Array.BYTES_PER_ELEMENT;
 export const crypto_box_x25519_NONCEBYTES = 12 * Uint8Array.BYTES_PER_ELEMENT;
 export const crypto_kx_SESSIONKEYBYTES = 32 * Uint8Array.BYTES_PER_ELEMENT;
+export const crypto_aead_chacha20poly1305_ietf_KEYBYTES =
+  32 * Uint8Array.BYTES_PER_ELEMENT;
 export const crypto_pwhash_argon2id_SALTBYTES =
   16 * Uint8Array.BYTES_PER_ELEMENT;
 
@@ -78,6 +80,7 @@ export default {
   crypto_box_x25519_SECRETKEYBYTES,
   crypto_box_x25519_NONCEBYTES,
   crypto_kx_SESSIONKEYBYTES,
+  crypto_aead_chacha20poly1305_ietf_KEYBYTES,
   crypto_pwhash_argon2id_SALTBYTES,
   commitLen,
   commitDetailsLen,

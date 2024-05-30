@@ -1,9 +1,9 @@
 {
   "compilerOptions": {
-    "target": "es2021",
+    "target": "esnext",
     "module": "ESNext",
     "outDir": "lib",
-    "moduleResolution": "node",
+    "moduleResolution": "bundler",
     "declaration": true,
     "declarationMap": true,
     "allowJs": true,
@@ -22,9 +22,9 @@
     "noImplicitReturns": true,
     "noFallthroughCasesInSwitch": true,
     "paths": {
-      "@libdemos": ["./wasm/node/libdemos"]
+      "@libdemos": ["./wasm/libdemos"]
     }
   },
-  "include": ["src", "__tests__"],
+  "include": ["src", "__tests__", "wasm"],
   "exclude": ["node_modules"]
 }

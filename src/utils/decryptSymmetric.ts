@@ -5,7 +5,7 @@ import libdemos from "@libdemos";
 import type { LibDemos } from "@libdemos";
 
 import {
-  crypto_kx_SESSIONKEYBYTES,
+  crypto_aead_chacha20poly1305_ietf_KEYBYTES,
   getDecryptedLen,
 } from "../utils/interfaces";
 
@@ -83,8 +83,12 @@ const decryptSymmetric = async (
   );
   encryptedArray.set(encrypted);
 
-  const ptr2 = demosModule._malloc(crypto_kx_SESSIONKEYBYTES);
-  const k = new Uint8Array(wasmMemory.buffer, ptr2, crypto_kx_SESSIONKEYBYTES);
+  const ptr2 = demosModule._malloc(crypto_aead_chacha20poly1305_ietf_KEYBYTES);
+  const k = new Uint8Array(
+    wasmMemory.buffer,
+    ptr2,
+    crypto_aead_chacha20poly1305_ietf_KEYBYTES,
+  );
   k.set(symmetricKey);
 
   const ptr3 = demosModule._malloc(

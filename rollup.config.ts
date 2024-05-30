@@ -10,10 +10,7 @@ import analyzer from "rollup-plugin-analyzer";
 import copy from "rollup-plugin-copy";
 import alias from "@rollup/plugin-alias";
 
-import pkg from "./package.json" assert { type: "json" };
-
 const production = process.env.NODE_ENV === "production";
-const browser = process.env.NODE_OR_BROWSER === "browser";
 const dir = "lib";
 const input = "src/index.ts";
 
@@ -22,12 +19,7 @@ const plugins = [
     entries: [
       {
         find: "@libdemos",
-        replacement: path.join(
-          process.cwd(),
-          "wasm",
-          browser ? "browser" : "node",
-          "libdemos",
-        ),
+        replacement: path.join(process.cwd(), "wasm", "libdemos"),
       },
     ],
   }),
@@ -41,8 +33,8 @@ const plugins = [
     // jsnext: true,
     // main: true,
     // module: true,
-    browser,
-    preferBuiltins: !browser,
+    browser: true,
+    preferBuiltins: false,
   }),
 
   commonjs(),
@@ -57,37 +49,31 @@ const plugins = [
   typescript({
     sourceMap: true,
     inlineSources: !production,
+    declaration: true,
     declarationMap: true,
     exclude: [
-      `**${path.sep}__tests__`,
-      `**${path.sep}*.test.{j,t}s`,
-      `**${path.sep}__spec__`,
-      `**${path.sep}*.spec.{j,t}s`,
+      `__tests__`,
+      `__tests__${path.sep}*.test.{j,t}s`,
+      `__spec__`,
+      `__spec__${path.sep}*.spec.{j,t}s`,
       "playwright*",
       "rollup*",
     ],
     paths: {
-      "@libdemos": [
-        path.join(
-          process.cwd(),
-          "wasm",
-          browser ? "browser" : "node",
-          "libdemos",
-        ),
-      ],
+      "@libdemos": [path.join(process.cwd(), "wasm", "libdemos")],
     },
     outDir: `${dir}`,
   }),
 
-  !browser &&
-    copy({
-      targets: [
-        {
-          src: path.join(process.cwd(), "wasm", "node", "libdemos.wasm"),
-          dest: `${dir}`,
-        },
-      ],
-    }),
+  // !browser &&
+  copy({
+    targets: [
+      {
+        src: path.join(process.cwd(), "wasm"),
+        dest: `${dir}`,
+      },
+    ],
+  }),
 
   analyzer(),
 ];
@@ -99,21 +85,14 @@ export default [
     plugins,
     output: {
       name: "ondemos",
-      file: pkg.browser,
+      file: `lib${path.sep}index.min.js`,
       format: "umd",
       esModule: false,
       interop: "default",
       extend: true,
       sourcemap: true,
       paths: {
-        "@libdemos": [
-          path.join(
-            process.cwd(),
-            "wasm",
-            browser ? "browser" : "node",
-            "libdemos",
-          ),
-        ],
+        "@libdemos": [path.join(process.cwd(), "wasm", "libdemos")],
       },
     },
   },
@@ -125,59 +104,25 @@ export default [
     external: ["module"],
     output: [
       {
-        file: pkg.module,
+        file: `lib${path.sep}index.mjs`,
         format: "es",
         esModule: true,
         interop: "esModule",
         exports: "named",
         sourcemap: true,
         paths: {
-          "@libdemos": [
-            path.join(
-              process.cwd(),
-              "wasm",
-              browser ? "browser" : "node",
-              "libdemos",
-            ),
-          ],
+          "@libdemos": [path.join(process.cwd(), "wasm", "libdemos")],
         },
       },
-
-      !browser && {
-        file: pkg.module.replace(".mjs", ".node.mjs"),
-        format: "es",
-        esModule: true,
-        interop: "esModule",
-        exports: "named",
-        sourcemap: true,
-        paths: {
-          "@libdemos": [
-            path.join(
-              process.cwd(),
-              "wasm",
-              browser ? "browser" : "node",
-              "libdemos",
-            ),
-          ],
-        },
-      },
-
       {
-        file: pkg.main,
+        file: `lib${path.sep}index.js`,
         format: "cjs",
         esModule: false,
         interop: "defaultOnly",
         exports: "default",
         sourcemap: true,
         paths: {
-          "@libdemos": [
-            path.join(
-              process.cwd(),
-              "wasm",
-              browser ? "browser" : "node",
-              "libdemos",
-            ),
-          ],
+          "@libdemos": [path.join(process.cwd(), "wasm", "libdemos")],
         },
       },
     ],

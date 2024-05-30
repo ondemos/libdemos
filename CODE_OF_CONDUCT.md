@@ -6,7 +6,7 @@ Towards this end, certain behaviors and practices will not be tolerated.
 ## tl;dr
 
 - Be respectful.
-- We're here to help: abuse@deliberative.io
+- We're here to help: abuse@ondemos.org
 - Abusive behavior is never tolerated.
 - Violations of this code may result in swift and permanent expulsion from the deliberative.eu community.
 - "Too long, didn't read" is not a valid excuse for not knowing what is in this document.
@@ -26,7 +26,7 @@ Towards this end, certain behaviors and practices will not be tolerated.
 
 ## Scope
 
-We expect all members of the deliberative.eu community to abide by this Code of Conduct at all times in all deliberative.eu community venues,
+We expect all members of the ondemos.org community to abide by this Code of Conduct at all times in all deliberative.eu community venues,
 online and in person, and in one-on-one communications pertaining to deliberative.eu affairs.
 
 This policy covers the usage of deliberative.eu public infrastructure, including the deliberative.eu HTTP gateways,

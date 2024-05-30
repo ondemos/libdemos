@@ -1,5 +1,5 @@
 {
-  "name": "ondemos",
+  "name": "@ondemos/core",
   "description": "A cryptographic commitment scheme with implied order of ownership wasm module for nodejs and the browser.",
   "version": "0.2.5",
   "repository": {
@@ -34,47 +34,34 @@
     "typescript"
   ],
   "homepage": "https://git.ondemos.org/core-js#readme",
-  "main": "lib/index.cjs",
+  "main": "lib/index.js",
   "module": "lib/index.mjs",
-  "browser": "lib/index.min.js",
   "types": "lib/index.d.ts",
   "exports": {
     ".": {
-      "node": {
-        "module": "./lib/index.node.mjs",
-        "require": "./lib/index.cjs",
-        "import": "./lib/index.node.mjs"
-      },
-      "browser": {
-        "import": "./lib/index.mjs",
-        "require": "./lib/index.cjs"
-      },
+      "require": "./lib/index.js",
+      "import": "./lib/index.mjs",
+      "module": "./lib/index.mjs",
+      "types": "./lib/index.d.ts",
       "default": "./lib/index.min.js"
     },
-    "./package.json": "./package.json"
+    "./package.json": "package.json"
   },
   "files": [
     "lib/**/*"
   ],
   "scripts": {
     "start": "cross-env NODE_ENV=development rollup --config rollup.config.ts --configPlugin typescript",
-    "build:browser": "cross-env NODE_ENV=production NODE_OR_BROWSER=browser rollup --config rollup.config.ts --configPlugin typescript",
-    "build:node": "cross-env NODE_ENV=production NODE_OR_BROWSER=node rollup --config rollup.config.ts --configPlugin typescript",
     "copy:wasm": "rm -rf wasm && cp -r ../core/build/wasm wasm",
-    "build": "npm-run-all -s build:node build:browser",
     "build:debug": "cross-env NODE_ENV=development rollup --config rollup.config.ts --configPlugin typescript",
-    "postbuild": "node scripts/postBuild.js",
-    "jest": "jest --config jest.config.json",
-    "test": "cross-env NODE_OR_BROWSER=node npm-run-all -s build jest",
+    "build": "cross-env NODE_ENV=production rollup --config rollup.config.ts --configPlugin typescript",
+    "postbuild": "node scripts/postBuild.cjs",
+    "test": "jest --config jest.config.json",
     "format": "prettier --write src __tests__ *.ts",
     "lint": "eslint --ext .js,.ts src __tests__",
     "prepublishOnly": "npm-run-all -s lint test build",
     "preversion": "npm-run-all -s lint format",
     "docs": "typedoc --out docs --excludeInternal src/index.ts"
-  },
-  "dependencies": {
-    "@deliberative/crypto": "^1.0.8",
-    "idb": "^8.0.0"
   },
   "devDependencies": {
     "@rollup/plugin-alias": "^5.1.0",
