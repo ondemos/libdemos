@@ -35,7 +35,7 @@ int decrypt_chachapoly_asymmetric(
 
 int encrypt_chachapoly_symmetric(
     const unsigned int DATA_LEN, const uint8_t data[DATA_LEN],
-    const uint8_t key[crypto_kx_SESSIONKEYBYTES],
+    const uint8_t key[crypto_aead_chacha20poly1305_ietf_KEYBYTES],
     const unsigned int ADDITIONAL_DATA_LEN,
     const uint8_t additional_data[ADDITIONAL_DATA_LEN],
     uint8_t encrypted[crypto_aead_chacha20poly1305_ietf_NPUBBYTES + DATA_LEN
@@ -44,7 +44,7 @@ int encrypt_chachapoly_symmetric(
 int decrypt_chachapoly_symmetric(
     const unsigned int ENCRYPTED_LEN,
     const uint8_t encrypted_data[ENCRYPTED_LEN],
-    const uint8_t key[crypto_kx_SESSIONKEYBYTES],
+    const uint8_t key[crypto_aead_chacha20poly1305_ietf_KEYBYTES],
     const unsigned int ADDITIONAL_DATA_LEN,
     const uint8_t additional_data[ADDITIONAL_DATA_LEN],
     uint8_t data[ENCRYPTED_LEN - crypto_aead_chacha20poly1305_ietf_NPUBBYTES

@@ -42,9 +42,9 @@ const buildPath = path.join(
   process.cwd(), 
   "build", 
   "wasm", 
-  process.env.NODE_OR_BROWSER === "browser" 
-    ? "browser" 
-    : "node"
+  // process.env.NODE_OR_BROWSER === "browser" 
+  //   ? "browser" 
+  //   : "node"
 );
 if (fs.existsSync(buildPath))
   fs.rmSync(buildPath, { recursive: true, force: true });
@@ -78,13 +78,13 @@ const withJS = ` \
 -s SUPPORT_LONGJMP=0 \
 `;
 
-const browser =
-  process.env.NODE_OR_BROWSER === "browser" ? ` \
--s SINGLE_FILE=1 \
--s ENVIRONMENT=\'web\' \
-` : `\
--s ENVIRONMENT=\'node\' \
-`;
+// const browser =
+//   process.env.NODE_OR_BROWSER === "browser" ? ` \
+// -s SINGLE_FILE=1 \
+// -s ENVIRONMENT=\'web\' \
+// ` : `\
+// -s ENVIRONMENT=\'node\' \
+// `;
 
 const memory = `\
 -s IMPORTED_MEMORY=1 \
@@ -112,9 +112,9 @@ emcc \
 -fno-keep-static-consts \
 -fvectorize \
 -s STRICT \
+-s SINGLE_FILE=1 \
 ${memory} \
 ${withJS} \
-${browser} \
 -s NODEJS_CATCH_EXIT=0 \
 -s NODEJS_CATCH_REJECTION=0 \
 `;

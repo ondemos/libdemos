@@ -61,5 +61,6 @@ chmod a+x ./build/__tests__/test
 #     ./build/__tests__/test
 
 source ./emsdk/emsdk_env.sh
-NODE_OR_BROWSER="browser" NODE_ENV="production" node scripts/emscripten.js
-NODE_OR_BROWSER="node" NODE_ENV="production" node scripts/emscripten.js
+NODE_ENV="production" node scripts/emscripten.js
+# NODE_OR_BROWSER="browser" NODE_ENV="production" node scripts/emscripten.js
+# NODE_OR_BROWSER="node" NODE_ENV="production" node scripts/emscripten.js
