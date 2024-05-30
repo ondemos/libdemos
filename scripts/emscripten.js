@@ -113,6 +113,7 @@ emcc \
 -fvectorize \
 -s STRICT \
 -s SINGLE_FILE=1 \
+-s ENVIRONMENT=web \
 ${memory} \
 ${withJS} \
 -s NODEJS_CATCH_EXIT=0 \
