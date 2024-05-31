@@ -1,4 +1,4 @@
-# Welcome to @deliberative/crypto contributing guide <!-- omit in toc -->
+# Welcome to @ondemos/core contributing guide <!-- omit in toc -->
 
 Thank you for investing your time in contributing to our project! Any contribution you make will be reflected on the project's GitHub homepage :sparkles:.
 
@@ -17,28 +17,23 @@ To get an overview of the project, read the [README](README.md). Here are some r
 
 ## Getting started
 
-To get started you need to have [nodejs](https://github.com/nodejs/node) and [emsdk](https://github.com/emscripten-core/emsdk) installed on your machine and in your path.
-You also need to clone this repository and its submodule in order to be able to compile the library
+To get started you need to have [emsdk](https://github.com/emscripten-core/emsdk) installed on your machine and in your path.
+You also need to clone this repository and [libsodium](https://github.com/jedisct1/libsodium) as a submodule in order to be able to compile the library
 
 ```
-git clone git@github.com:deliberative/crypto.git dcrypto
-cd dcrypto
-npm i
+git clone git@github.com:ondemos/core.git ondemos
+cd ondemos 
 git submodule update --init --recursive
+source ./build.sh
 ```
 
-To check that everything works as expected you can run
-
-```
-npm run valgrind
-npm test
-```
+The build script will compile the files in the [__tests__](__tests_) folder. For now this only tests the private liquid voting functionality.
 
 ### Issues
 
 #### Create a new issue
 
-If you spot a problem with the code, [search if an issue already exists](https://github.com/deliberative/crypto/issues). If a related issue doesn't exist,
+If you spot a problem with the code, [search if an issue already exists](https://github.com/ondemos/core/issues). If a related issue doesn't exist,
 you can open a new issue by pasting the relevant output of your terminal.
 
 #### Solve an issue
@@ -62,7 +57,7 @@ If you want to make changes to the code, you also need to write a corresponding 
 - Using the command line:
   - [Fork the repo](https://docs.github.com/en/github/getting-started-with-github/fork-a-repo#fork-an-example-repository) so that you can make your changes without affecting the original project until you're ready to merge them.
 
-2. Install or update to **Node.js v19** and **emsdk v3.1.28** or later.
+2. Install or update to **Node.js v22** and **emsdk v3.1.60** or later.
 
 3. Create a working branch and start with your changes!
 
