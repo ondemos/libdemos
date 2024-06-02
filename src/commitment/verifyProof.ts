@@ -19,11 +19,10 @@ const verifyProof = async (
   module?: LibDemos,
 ): Promise<number> => {
   const proofLen = proof.length;
-  const wasmMemory = module
-    ? module.wasmMemory
-    : demosMemory.verifyProofMemory(proofLen);
+  const wasmMemory =
+    module?.wasmMemory ?? demosMemory.verifyProofMemory(proofLen);
   const demosModule =
-    module ||
+    module ??
     (await libdemos({
       wasmMemory,
     }));

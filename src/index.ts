@@ -55,6 +55,7 @@ const ondemos = {
     decryptAsymmetric: utils.memory.decryptAsymmetricMemory,
     encryptSymmetric: utils.memory.encryptSymmetricMemory,
     decryptSymmetric: utils.memory.decryptSymmetricMemory,
+    merkleRoot: merkle.memory.getMerkleRootMemory,
   },
   constants: {
     commit_BYTES: utils.interfaces.commitLen,

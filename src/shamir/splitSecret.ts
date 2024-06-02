@@ -17,10 +17,10 @@ const splitSecret = async (
   if (sharesLen < threshold) throw new Error("Shares are less than threshold");
   if (sharesLen > 255) throw new Error("Shares exceed 255");
 
-  const wasmMemory = module
-    ? module.wasmMemory
-    : demosMemory.splitSecretMemory(secretLen, sharesLen, threshold);
-  const demosModule = module || (await libdemos({ wasmMemory })); // await shamirMethodsModule({ wasmMemory });
+  const wasmMemory =
+    module?.wasmMemory ??
+    demosMemory.splitSecretMemory(secretLen, sharesLen, threshold);
+  const demosModule = module ?? (await libdemos({ wasmMemory })); // await shamirMethodsModule({ wasmMemory });
 
   const ptr1 = demosModule._malloc(secretLen * Uint8Array.BYTES_PER_ELEMENT);
   const secretArray = new Uint8Array(

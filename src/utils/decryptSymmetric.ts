@@ -67,11 +67,11 @@ const decryptSymmetric = async (
   const len = encrypted.length;
   const additionalLen = additionalData.length;
 
-  const wasmMemory = module
-    ? module.wasmMemory
-    : demosMemory.decryptSymmetricMemory(len, additionalLen);
+  const wasmMemory =
+    module?.wasmMemory ??
+    demosMemory.decryptSymmetricMemory(len, additionalLen);
 
-  const demosModule = module || (await libdemos({ wasmMemory }));
+  const demosModule = module ?? (await libdemos({ wasmMemory }));
 
   const decryptedLen = getDecryptedLen(len);
 

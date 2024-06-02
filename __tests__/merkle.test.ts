@@ -1,12 +1,17 @@
 import ondemos from "../src";
 
-jest.setTimeout(70 * 1000);
-
 describe("Merkle test suite.", () => {
   test("Merkle root calculation works.", async () => {
     const tree: Uint8Array[] = [];
-    for (let i = 0; i < 201; i++) {
-      const rand = await ondemos.randomBytes(128);
+    const dataLen = 128;
+    const leavesLen = 201;
+
+    const randomBytesMemory = ondemos.loadWasmMemory.randomBytes(dataLen);
+    const randomBytesModule = await ondemos.loadWasmModule({
+      wasmMemory: randomBytesMemory,
+    });
+    for (let i = 0; i < leavesLen; i++) {
+      const rand = await ondemos.randomBytes(dataLen, randomBytesModule);
       tree.push(rand);
     }
 
@@ -25,8 +30,13 @@ describe("Merkle test suite.", () => {
     const elements = 201;
     const elementIndex = 99;
     const anotherElementIndex = 168;
+
+    const randomBytesMemory = ondemos.loadWasmMemory.randomBytes(elements);
+    const randomBytesModule = await ondemos.loadWasmModule({
+      wasmMemory: randomBytesMemory,
+    });
     for (let i = 0; i < elements; i++) {
-      const rand = await ondemos.randomBytes(128);
+      const rand = await ondemos.randomBytes(128, randomBytesModule);
 
       if (i === elementIndex) element.set([...rand]);
 
@@ -70,8 +80,13 @@ describe("Merkle test suite.", () => {
     const element = new Uint8Array(128);
     const elements = 201;
     const elementIndex = 139;
+
+    const randomBytesMemory = ondemos.loadWasmMemory.randomBytes(elements);
+    const randomBytesModule = await ondemos.loadWasmModule({
+      wasmMemory: randomBytesMemory,
+    });
     for (let i = 0; i < elements; i++) {
-      const rand = await ondemos.randomBytes(128);
+      const rand = await ondemos.randomBytes(128, randomBytesModule);
 
       if (i === elementIndex) element.set([...rand]);
 
@@ -98,8 +113,13 @@ describe("Merkle test suite.", () => {
     const element = new Uint8Array(128);
     const elements = 200;
     const elementIndex = 161;
+
+    const randomBytesMemory = ondemos.loadWasmMemory.randomBytes(elements);
+    const randomBytesModule = await ondemos.loadWasmModule({
+      wasmMemory: randomBytesMemory,
+    });
     for (let i = 0; i < elements; i++) {
-      const rand = await ondemos.randomBytes(128);
+      const rand = await ondemos.randomBytes(128, randomBytesModule);
 
       if (i === elementIndex) element.set([...rand]);
 
@@ -126,8 +146,13 @@ describe("Merkle test suite.", () => {
     const element = new Uint8Array(128);
     const elements = 201;
     const elementIndex = 99;
+
+    const randomBytesMemory = ondemos.loadWasmMemory.randomBytes(elements);
+    const randomBytesModule = await ondemos.loadWasmModule({
+      wasmMemory: randomBytesMemory,
+    });
     for (let i = 0; i < elements; i++) {
-      const rand = await ondemos.randomBytes(128);
+      const rand = await ondemos.randomBytes(128, randomBytesModule);
 
       if (i === elementIndex) element.set([...rand]);
 
@@ -162,185 +187,5 @@ describe("Merkle test suite.", () => {
     );
 
     expect(verification).toBe(false);
-  });
-
-  const len = 64;
-  const arr1 = new Uint8Array(len);
-  const arr2 = new Uint8Array(len);
-  arr1.fill(1);
-  arr2.fill(2);
-
-  const arr3 = new Uint8Array(len);
-  arr3.fill(1);
-
-  const arr4 = new Uint8Array(len);
-  arr4.fill(4);
-
-  const arrayOfArrays1: Uint8Array[] = [];
-  arrayOfArrays1.push(arr2);
-  arrayOfArrays1.push(arr4);
-  arrayOfArrays1.push(arr2);
-
-  interface SomeRandomInterface {
-    val1: string;
-    val2: string;
-    val3: string;
-  }
-
-  const arr5: SomeRandomInterface = {
-    val1: "1",
-    val2: "2",
-    val3: "3",
-  };
-
-  const arr6: SomeRandomInterface = {
-    val1: "5",
-    val2: "6",
-    val3: "7",
-  };
-
-  const arr7: SomeRandomInterface = {
-    val1: "10",
-    val2: "20",
-    val3: "30",
-  };
-
-  const arrayOfArrays3: SomeRandomInterface[] = [arr5, arr6, arr7];
-
-  const numberToUint8Array = (n: number): Uint8Array => {
-    return Uint8Array.of(
-      (n & 0xff000000) >> 24,
-      (n & 0x00ff0000) >> 16,
-      (n & 0x0000ff00) >> 8,
-      (n & 0x000000ff) >> 0,
-    );
-  };
-
-  const someRandomInterfaceSerializer = (item: SomeRandomInterface) => {
-    const uint8 = new Uint8Array(4 * 3 * Uint8Array.BYTES_PER_ELEMENT);
-
-    uint8.set(numberToUint8Array(Number(item.val1)));
-    uint8.set(
-      numberToUint8Array(Number(item.val2)),
-      4 * Uint8Array.BYTES_PER_ELEMENT,
-    );
-    uint8.set(
-      numberToUint8Array(Number(item.val3)),
-      8 * Uint8Array.BYTES_PER_ELEMENT,
-    );
-
-    return uint8;
-  };
-
-  it("Should be possible to get Merkle root and proof from non-Uint8 data.", async () => {
-    const root = await ondemos.getMerkleRoot(
-      arrayOfArrays3,
-      someRandomInterfaceSerializer,
-    );
-
-    const arr6Serialized = someRandomInterfaceSerializer(arr6);
-    const proof1 = await ondemos.getMerkleProof(
-      arrayOfArrays3,
-      arr6Serialized,
-      someRandomInterfaceSerializer,
-    );
-
-    const arrayOfArrays3Serialized: Uint8Array[] = [];
-    for (let i = 0; i < arrayOfArrays3.length; i++) {
-      arrayOfArrays3Serialized.push(
-        someRandomInterfaceSerializer(arrayOfArrays3[i]),
-      );
-    }
-    const proof2 = await ondemos.getMerkleProof(
-      arrayOfArrays3Serialized,
-      arr6,
-      someRandomInterfaceSerializer,
-    );
-
-    const elementHash = await ondemos.sha512(arr6Serialized);
-    const verification1 = await ondemos.verifyMerkleProof(
-      elementHash,
-      root,
-      proof1,
-    );
-
-    const verification2 = await ondemos.verifyMerkleProof(
-      elementHash,
-      root,
-      proof2,
-    );
-
-    expect(verification1).toBe(true);
-    expect(verification2).toBe(true);
-
-    const root1 = await ondemos.getMerkleRoot(
-      [arr6],
-      someRandomInterfaceSerializer,
-    );
-    expect(root1.length).toBe(64);
-
-    const root2 = await ondemos.getMerkleRoot([arr6Serialized]);
-    expect(root2.length).toBe(64);
-  });
-
-  it("Should be possible to get Merkle root for one-element arrays.", async () => {
-    const proof = await ondemos.getMerkleProof(
-      [arr6],
-      arr6,
-      someRandomInterfaceSerializer,
-    );
-
-    expect(proof).toStrictEqual(
-      new Uint8Array(ondemos.constants.crypto_hash_sha512_BYTES + 1).fill(1),
-    );
-
-    const root = await ondemos.getMerkleRoot(
-      [arr6],
-      someRandomInterfaceSerializer,
-    );
-
-    const arr6Serialized = someRandomInterfaceSerializer(arr6);
-    const elementHash = await ondemos.sha512(arr6Serialized);
-    expect(elementHash).toStrictEqual(root);
-
-    const rootFromProof = await ondemos.getMerkleRootFromProof(
-      elementHash,
-      proof,
-    );
-    expect(rootFromProof).toStrictEqual(root);
-
-    const verification = await ondemos.verifyMerkleProof(
-      elementHash,
-      root,
-      proof,
-    );
-
-    expect(verification).toBe(true);
-  });
-
-  it("Should throw errors when trying to get merkle root with wrong data.", async () => {
-    await expect(
-      ondemos.getMerkleRoot([], someRandomInterfaceSerializer),
-    ).rejects.toThrow("Cannot calculate Merkle root of tree with no leaves.");
-
-    await expect(ondemos.getMerkleRoot([arr6])).rejects.toThrow(
-      "Tree leaf not Uint8Array, needs serializer.",
-    );
-
-    await expect(ondemos.getMerkleRoot(arrayOfArrays3)).rejects.toThrow(
-      "Tree leaf not Uint8Array, needs serializer.",
-    );
-  });
-
-  it("Should throw errors when trying to get merkle proof with wrong data.", async () => {
-    await expect(
-      ondemos.getMerkleProof([], arr6, someRandomInterfaceSerializer),
-    ).rejects.toThrow(
-      "Cannot calculate Merkle proof of element of empty tree.",
-    );
-
-    await expect(ondemos.getMerkleProof(arrayOfArrays3, arr6)).rejects.toThrow(
-      "It is mandatory to provide a serializer for non-Uint8Array items",
-    );
   });
 });

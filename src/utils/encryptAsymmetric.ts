@@ -74,11 +74,11 @@ const encryptAsymmetric = async (
   const len = message.length;
   const additionalLen = additionalData.length;
 
-  const wasmMemory = module
-    ? module.wasmMemory
-    : demosMemory.encryptAsymmetricMemory(len, additionalLen);
+  const wasmMemory =
+    module?.wasmMemory ??
+    demosMemory.encryptAsymmetricMemory(len, additionalLen);
 
-  const demosModule = module || (await libdemos({ wasmMemory }));
+  const demosModule = module ?? (await libdemos({ wasmMemory }));
 
   const ptr1 = demosModule._malloc(len * Uint8Array.BYTES_PER_ELEMENT);
   const dataArray = new Uint8Array(

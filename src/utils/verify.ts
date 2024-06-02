@@ -18,7 +18,7 @@ const verify = async (
 
   const wasmMemory = module ? module.wasmMemory : demosMemory.verifyMemory(len);
 
-  const demosModule = module || (await libdemos({ wasmMemory }));
+  const demosModule = module ?? (await libdemos({ wasmMemory }));
 
   const ptr1 = demosModule._malloc(len * Uint8Array.BYTES_PER_ELEMENT);
   const dataArray = new Uint8Array(

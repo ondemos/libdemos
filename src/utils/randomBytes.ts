@@ -17,10 +17,10 @@ const randomBytes = async (
   n: number,
   module?: LibDemos,
 ): Promise<Uint8Array> => {
-  const wasmMemory = module?.wasmMemory || demosMemory.randomBytes(n);
+  const wasmMemory = module?.wasmMemory ?? demosMemory.randomBytes(n);
 
   const demosModule =
-    module ||
+    module ??
     (await libdemos({
       wasmMemory,
     }));

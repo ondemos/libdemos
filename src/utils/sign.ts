@@ -23,7 +23,7 @@ const sign = async (
     ? module.wasmMemory
     : demosMemory.signMemory(messageLen);
 
-  const demosModule = module || (await libdemos({ wasmMemory }));
+  const demosModule = module ?? (await libdemos({ wasmMemory }));
 
   const ptr1 = demosModule._malloc(messageLen * Uint8Array.BYTES_PER_ELEMENT);
   const dataArray = new Uint8Array(

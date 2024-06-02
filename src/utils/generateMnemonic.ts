@@ -61,6 +61,7 @@ const generateMnemonic = async (
 
   const bits = entropyBits + checksumBits;
 
+  // eslint-disable-next-line @typescript-eslint/non-nullable-type-assertion-style
   const chunks = bits.match(/(.{1,11})/g) as RegExpMatchArray;
 
   // if (!chunks)

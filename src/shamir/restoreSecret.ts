@@ -13,11 +13,10 @@ const restoreSecret = async (shares: Uint8Array[], module?: LibDemos) => {
 
   const secretLen = shareItemLen - 1;
 
-  const wasmMemory = module
-    ? module.wasmMemory
-    : demosMemory.restoreSecretMemory(secretLen, sharesLen);
+  const wasmMemory =
+    module?.wasmMemory ?? demosMemory.restoreSecretMemory(secretLen, sharesLen);
 
-  const demosModule = module || (await libdemos({ wasmMemory })); // await shamirMethodsModule({ wasmMemory });
+  const demosModule = module ?? (await libdemos({ wasmMemory })); // await shamirMethodsModule({ wasmMemory });
 
   const ptr1 = demosModule._malloc(
     sharesLen * (secretLen + 1) * Uint8Array.BYTES_PER_ELEMENT,

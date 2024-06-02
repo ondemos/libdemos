@@ -22,11 +22,10 @@ const randomNumberInRange = async (
   if (min < 0 || max < 0) throw new Error("Only positive integers allowed.");
   if (min === max) return min;
 
-  const wasmMemory = module
-    ? module.wasmMemory
-    : demosMemory.randomNumberInRange(min, max);
+  const wasmMemory =
+    module?.wasmMemory ?? demosMemory.randomNumberInRange(min, max);
 
-  const demosModule = module || (await libdemos({ wasmMemory }));
+  const demosModule = module ?? (await libdemos({ wasmMemory }));
 
   const res = demosModule._random_number_in_range(min, max);
 

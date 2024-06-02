@@ -84,7 +84,6 @@ describe("Signing and verifying with Ed25519 keys test suite.", () => {
       module,
     );
 
-    expect(signature !== null).toBe(true);
     expect(signature.length).toBe(64);
 
     expect(arraysAreEqual(signature, otherSignature)).toBe(true);

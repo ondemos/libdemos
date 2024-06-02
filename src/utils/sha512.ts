@@ -15,7 +15,7 @@ const sha512 = async (
     ? module.wasmMemory
     : demosMemory.sha512Memory(dataLen);
 
-  const demosModule = module || (await libdemos({ wasmMemory }));
+  const demosModule = module ?? (await libdemos({ wasmMemory }));
 
   const ptr1 = demosModule._malloc(dataLen * Uint8Array.BYTES_PER_ELEMENT);
   const arr = new Uint8Array(

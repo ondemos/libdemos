@@ -31,11 +31,11 @@ const generateProof = async (
   if (identityChosenIndex >= identitiesLen)
     throw new Error("Identity chosen is out of bounds.");
 
-  const wasmMemory = module
-    ? module.wasmMemory
-    : demosMemory.generateProofMemory(identitiesLen, identityChosenIndex);
+  const wasmMemory =
+    module?.wasmMemory ??
+    demosMemory.generateProofMemory(identitiesLen, identityChosenIndex);
   const demosModule =
-    module ||
+    module ??
     (await libdemos({
       wasmMemory,
     }));

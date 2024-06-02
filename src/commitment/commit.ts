@@ -24,9 +24,9 @@ const commit = async (
       "A commitment must always be the length of a SHA512 digest.",
     );
 
-  const wasmMemory = module ? module.wasmMemory : demosMemory.commitMemory();
+  const wasmMemory = module?.wasmMemory ?? demosMemory.commitMemory();
   const demosModule =
-    module ||
+    module ??
     (await libdemos({
       wasmMemory,
     }));

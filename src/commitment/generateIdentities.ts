@@ -27,11 +27,10 @@ const generateIdentities = async (
   secretKeys: Uint8Array[];
   commitDetails: Uint8Array;
 }> => {
-  const wasmMemory = module
-    ? module.wasmMemory
-    : demosMemory.generateIdentitiesMemory(identitiesLen);
+  const wasmMemory =
+    module?.wasmMemory ?? demosMemory.generateIdentitiesMemory(identitiesLen);
   const demosModule =
-    module ||
+    module ??
     (await libdemos({
       wasmMemory,
     }));

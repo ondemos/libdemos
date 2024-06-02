@@ -17,8 +17,8 @@ describe("Starting the Shamir test suite.", () => {
   test("Splitting a secret key to Shamir shares works.", async () => {
     const mnemonic = await ondemos.generateMnemonic();
     const keypair = await ondemos.keyPairFromMnemonic(mnemonic);
-    const shares = await ondemos.splitSecret(keypair.secretKey, 10, 6);
-    expect(shares.length).toBe(10);
+    const shares = await ondemos.splitSecret(keypair.secretKey, 254, 30);
+    expect(shares.length).toBe(254);
     expect(shares[9].length).toBe(crypto_sign_ed25519_SECRETKEYBYTES + 1);
   });
 

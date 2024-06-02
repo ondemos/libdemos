@@ -27,13 +27,12 @@ const argon2 = async (
   const mnemonicInt8Array = new Int8Array(mnemonicBuffer);
   const mnemonicArrayLen = mnemonicInt8Array.length;
 
-  salt = salt || (await randomBytes(crypto_pwhash_argon2id_SALTBYTES));
+  salt = salt ?? (await randomBytes(crypto_pwhash_argon2id_SALTBYTES));
 
-  const wasmMemory = module
-    ? module.wasmMemory
-    : demosMemory.argon2Memory(mnemonicArrayLen);
+  const wasmMemory =
+    module?.wasmMemory ?? demosMemory.argon2Memory(mnemonicArrayLen);
 
-  const demosModule = module || (await libdemos({ wasmMemory }));
+  const demosModule = module ?? (await libdemos({ wasmMemory }));
 
   const ptr1 = demosModule._malloc(crypto_sign_ed25519_SEEDBYTES);
   const seed = new Uint8Array(

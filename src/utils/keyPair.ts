@@ -12,11 +12,9 @@ import {
 } from "../utils/interfaces";
 
 const newKeyPair = async (module?: LibDemos): Promise<SignKeyPair> => {
-  const wasmMemory = module
-    ? module.wasmMemory
-    : demosMemory.newKeyPairMemory();
+  const wasmMemory = module?.wasmMemory ?? demosMemory.newKeyPairMemory();
 
-  const demosModule = module || (await libdemos({ wasmMemory }));
+  const demosModule = module ?? (await libdemos({ wasmMemory }));
 
   const ptr1 = demosModule._malloc(crypto_sign_ed25519_PUBLICKEYBYTES);
   const publicKey = new Uint8Array(
@@ -60,11 +58,9 @@ const keyPairFromSeed = async (
   seed: Uint8Array,
   module?: LibDemos,
 ): Promise<SignKeyPair> => {
-  const wasmMemory = module
-    ? module.wasmMemory
-    : demosMemory.keyPairFromSeedMemory();
+  const wasmMemory = module?.wasmMemory ?? demosMemory.keyPairFromSeedMemory();
 
-  const demosModule = module || (await libdemos({ wasmMemory }));
+  const demosModule = module ?? (await libdemos({ wasmMemory }));
 
   const ptr1 = demosModule._malloc(crypto_sign_ed25519_PUBLICKEYBYTES);
   const publicKey = new Uint8Array(
@@ -122,11 +118,10 @@ const keyPairFromSecretKey = async (
   secretKey: Uint8Array,
   module?: LibDemos,
 ): Promise<SignKeyPair> => {
-  const wasmMemory = module
-    ? module.wasmMemory
-    : demosMemory.keyPairFromSecretKeyMemory();
+  const wasmMemory =
+    module?.wasmMemory ?? demosMemory.keyPairFromSecretKeyMemory();
 
-  const demosModule = module || (await libdemos({ wasmMemory }));
+  const demosModule = module ?? (await libdemos({ wasmMemory }));
 
   const ptr1 = demosModule._malloc(crypto_sign_ed25519_PUBLICKEYBYTES);
   const pk = new Uint8Array(

@@ -47,10 +47,7 @@ const keyPairFromMnemonic = async (mnemonic: string, password?: string) => {
 
   const seed = await argon2(mnemonic, salt);
 
-  const keypair = await keyPair.keyPairFromSeed(seed);
-  if (!keypair) throw new Error("Invalid seed from mnemonic.");
-
-  return keypair;
+  return await keyPair.keyPairFromSeed(seed);
 };
 
 export default keyPairFromMnemonic;

@@ -1,11 +1,12 @@
 import demosMemory from "./memory";
 
 import sha512 from "../utils/sha512";
-import isUint8Array from "../utils/isUint8Array";
 
 import libdemos from "@libdemos";
 
 import { crypto_hash_sha512_BYTES } from "../utils/interfaces";
+
+import type { LibDemos } from "@libdemos";
 
 /**
  * @function
@@ -15,16 +16,15 @@ import { crypto_hash_sha512_BYTES } from "../utils/interfaces";
  * Returns the Merkle proof of an element of a tree.
  * Can be used as a receipt of a transaction etc.
  *
- * @param {(T | Uint8Array)[]} tree: The tree.
- * @param {T | Uint8Array} element: The element.
- * @param {(i: T) => Uint8Array} serializer?: Converts leaves into Uint8Array.
+ * @param {Uint8Array[]} tree: The tree.
+ * @param {Uint8Array} element: The element.
  *
  * @returns {Promise<Uint8Array>}: The Merkle proof.
  */
-const getMerkleProof = async <T>(
-  tree: (T | Uint8Array)[],
-  element: T | Uint8Array,
-  serializer?: (i: T) => Uint8Array,
+const getMerkleProof = async (
+  tree: Uint8Array[],
+  element: Uint8Array,
+  module?: LibDemos,
 ): Promise<Uint8Array> => {
   const treeLen = tree.length;
   if (treeLen === 0) {
@@ -34,17 +34,13 @@ const getMerkleProof = async <T>(
     return new Uint8Array(crypto_hash_sha512_BYTES + 1).fill(1);
   }
 
-  const leavesAreUint8Arrays = isUint8Array(tree[0]);
-  const elementIsUint8Array = isUint8Array(element);
-  if (!serializer && (!leavesAreUint8Arrays || !elementIsUint8Array))
-    throw new Error(
-      "It is mandatory to provide a serializer for non-Uint8Array items",
-    );
-
-  const wasmMemory = demosMemory.getMerkleProofMemory(treeLen);
-  const demosModule = await libdemos({
-    wasmMemory,
-  });
+  const wasmMemory =
+    module?.wasmMemory ?? demosMemory.getMerkleProofMemory(treeLen);
+  const demosModule =
+    module ??
+    (await libdemos({
+      wasmMemory,
+    }));
 
   const ptr1 = demosModule._malloc(treeLen * crypto_hash_sha512_BYTES);
   const leavesHashed = new Uint8Array(
@@ -54,19 +50,9 @@ const getMerkleProof = async <T>(
   );
 
   let i = 0;
-  let leafIsUint8Array = false;
   let hash: Uint8Array;
-  let serialized: Uint8Array;
-  let leaf: T | Uint8Array;
   for (let j = 0; j < treeLen; j++) {
-    leaf = tree[i];
-    leafIsUint8Array = isUint8Array(leaf);
-    serialized = leafIsUint8Array
-      ? (leaf as Uint8Array)
-      : serializer
-        ? serializer(leaf as T)
-        : new Uint8Array(32); // will never happen
-    hash = await sha512(serialized, demosModule);
+    hash = await sha512(tree[i], demosModule);
     leavesHashed.set(hash, i * crypto_hash_sha512_BYTES);
     i++;
   }
@@ -77,12 +63,8 @@ const getMerkleProof = async <T>(
     ptr2,
     crypto_hash_sha512_BYTES,
   );
-  const elementSerialized = elementIsUint8Array
-    ? element
-    : serializer
-      ? serializer(element)
-      : new Uint8Array(32); // will never happen
-  hash = await sha512(elementSerialized);
+
+  hash = await sha512(element);
   elementHash.set(hash);
 
   const ptr3 = demosModule._malloc(treeLen * (crypto_hash_sha512_BYTES + 1));

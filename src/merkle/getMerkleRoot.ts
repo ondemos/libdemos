@@ -1,11 +1,12 @@
 import demosMemory from "./memory";
 
 import sha512 from "../utils/sha512";
-import isUint8Array from "../utils/isUint8Array";
 
 import libdemos from "@libdemos";
 
 import { crypto_hash_sha512_BYTES } from "../utils/interfaces";
+
+import type { LibDemos } from "@libdemos";
 
 /**
  * @function
@@ -18,30 +19,24 @@ import { crypto_hash_sha512_BYTES } from "../utils/interfaces";
  *
  * @returns Promise<Uint8Array>
  */
-const getMerkleRoot = async <T>(
-  tree: (T | Uint8Array)[],
-  serializer?: (i: T) => Uint8Array,
+const getMerkleRoot = async (
+  tree: Uint8Array[],
+  module?: LibDemos,
 ): Promise<Uint8Array> => {
   const treeLen = tree.length;
   if (treeLen === 0) {
     throw new Error("Cannot calculate Merkle root of tree with no leaves.");
   } else if (treeLen === 1) {
-    const leafIsUint8Array = isUint8Array(tree[0]);
-    if (!leafIsUint8Array && !serializer)
-      throw new Error("Tree leaf not Uint8Array, needs serializer.");
-    const leafSerialized = leafIsUint8Array
-      ? (tree[0] as Uint8Array)
-      : serializer
-        ? serializer(tree[0] as T)
-        : new Uint8Array(32); // will never happen
-
-    return await sha512(leafSerialized);
+    return await sha512(tree[0]);
   }
 
-  const wasmMemory = demosMemory.getMerkleRootMemory(treeLen);
-  const demosModule = await libdemos({
-    wasmMemory,
-  });
+  const wasmMemory =
+    module?.wasmMemory ?? demosMemory.getMerkleRootMemory(treeLen);
+  const demosModule =
+    module ??
+    (await libdemos({
+      wasmMemory,
+    }));
 
   const ptr1 = demosModule._malloc(treeLen * crypto_hash_sha512_BYTES);
   const leavesHashed = new Uint8Array(
@@ -51,23 +46,9 @@ const getMerkleRoot = async <T>(
   );
 
   let i = 0;
-  let leafIsUint8Array = false;
   let hash: Uint8Array;
-  let serialized: Uint8Array;
-  let leaf: T | Uint8Array;
   for (let j = 0; j < treeLen; j++) {
-    leaf = tree[i];
-
-    leafIsUint8Array = isUint8Array(leaf);
-    if (!leafIsUint8Array && !serializer)
-      throw new Error("Tree leaf not Uint8Array, needs serializer.");
-
-    serialized = leafIsUint8Array
-      ? (leaf as Uint8Array)
-      : serializer
-        ? serializer(leaf as T)
-        : new Uint8Array(32); // will never happen
-    hash = await sha512(serialized, demosModule);
+    hash = await sha512(tree[i], demosModule);
     leavesHashed.set(hash, i * crypto_hash_sha512_BYTES);
     i++;
   }
