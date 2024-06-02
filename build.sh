@@ -46,8 +46,8 @@ cmake --build build
 #     -o ./build/test.o \
 #     ./__tests__/test.c
 
-chmod a+x ./build/__tests__/test
-./build/__tests__/test
+chmod a+x ./build/__tests__/commit_test
+./build/__tests__/commit_test
 # rm -rf ./build/valgrind
 # mkdir ./build/valgrind
 # valgrind --log-file=./build/valgrind/log.txt \
@@ -59,6 +59,15 @@ chmod a+x ./build/__tests__/test
 #     --trace-children=yes \
 #     -v \
 #     ./build/__tests__/test
+
+chmod a+x ./build/__tests__/shamir_test
+./build/__tests__/shamir_test
+
+chmod a+x ./build/__tests__/crypto_test
+./build/__tests__/crypto_test
+
+chmod a+x ./build/__tests__/merkle_test
+./build/__tests__/merkle_test
 
 source ./emsdk/emsdk_env.sh
 NODE_ENV="production" node scripts/emscripten.js

@@ -60,14 +60,14 @@ get_merkle_proof(
       // number of leaves.
       if (odd_leaves && i + 1 == leaves)
       {
-        memcpy(&concat_hashes[0], &hashes[i], crypto_hash_sha512_BYTES);
+        memcpy(concat_hashes[0], hashes[i], crypto_hash_sha512_BYTES);
         // Concat leaf hash with itself.
-        memcpy(&concat_hashes[1], &hashes[i], crypto_hash_sha512_BYTES);
+        memcpy(concat_hashes[1], hashes[i], crypto_hash_sha512_BYTES);
 
         if (i == element_of_interest)
         {
           // Copy required hash of interest in the proof.
-          memcpy(&proof[k], &hashes[i], crypto_hash_sha512_BYTES);
+          memcpy(proof[k], hashes[i], crypto_hash_sha512_BYTES);
           // We do not care if left(0) or right(1) since hash of itself
           proof[k][crypto_hash_sha512_BYTES] = 0;
 
@@ -78,22 +78,22 @@ get_merkle_proof(
       }
       else
       {
-        memcpy(&concat_hashes[0], &hashes[i], crypto_hash_sha512_BYTES);
+        memcpy(concat_hashes[0], hashes[i], crypto_hash_sha512_BYTES);
         // In any other case concat leaf hash with the one on its right.
-        memcpy(&concat_hashes[1], &hashes[i + 1], crypto_hash_sha512_BYTES);
+        memcpy(concat_hashes[1], hashes[i + 1], crypto_hash_sha512_BYTES);
 
         if (i == element_of_interest || i + 1 == element_of_interest)
         {
           if (i == element_of_interest)
           {
-            memcpy(&proof[k], &hashes[i + 1], crypto_hash_sha512_BYTES);
+            memcpy(proof[k], hashes[i + 1], crypto_hash_sha512_BYTES);
             // Proof artifact needs to go to the right when concatenated with
             // element.
             proof[k][crypto_hash_sha512_BYTES] = 1;
           }
           else if (i + 1 == element_of_interest)
           {
-            memcpy(&proof[k], &hashes[i], crypto_hash_sha512_BYTES);
+            memcpy(proof[k], hashes[i], crypto_hash_sha512_BYTES);
             // Proof artifact needs to go to the left when concatenated with
             // element.
             proof[k][crypto_hash_sha512_BYTES] = 0;
@@ -105,7 +105,7 @@ get_merkle_proof(
         }
       }
 
-      res = crypto_hash_sha512(hashes[j], *concat_hashes,
+      res = crypto_hash_sha512(hashes[j], concat_hashes[0],
                                2 * crypto_hash_sha512_BYTES);
       if (res != 0)
       {

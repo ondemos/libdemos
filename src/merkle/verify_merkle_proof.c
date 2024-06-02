@@ -41,7 +41,7 @@ verify_merkle_proof(
       = malloc(sizeof(uint8_t[2][crypto_hash_sha512_BYTES]));
   if (concat_hashes == NULL) return -1;
 
-  uint8_t *hash = malloc(sizeof(uint8_t[crypto_hash_sha512_BYTES]));
+  uint8_t *hash = (uint8_t *)malloc(sizeof(uint8_t[crypto_hash_sha512_BYTES]));
   if (hash == NULL)
   {
     free(concat_hashes);
@@ -68,16 +68,16 @@ verify_merkle_proof(
     // Proof artifact goes to the left
     if (position == 0)
     {
-      memcpy(&concat_hashes[0], &proof[i], crypto_hash_sha512_BYTES);
-      memcpy(&concat_hashes[1], &hash[0], crypto_hash_sha512_BYTES);
+      memcpy(concat_hashes[0], proof[i], crypto_hash_sha512_BYTES);
+      memcpy(concat_hashes[1], hash, crypto_hash_sha512_BYTES);
     }
     else
     {
-      memcpy(&concat_hashes[0], &hash[0], crypto_hash_sha512_BYTES);
-      memcpy(&concat_hashes[1], &proof[i], crypto_hash_sha512_BYTES);
+      memcpy(concat_hashes[0], hash, crypto_hash_sha512_BYTES);
+      memcpy(concat_hashes[1], proof[i], crypto_hash_sha512_BYTES);
     }
 
-    res = crypto_hash_sha512(hash, *concat_hashes,
+    res = crypto_hash_sha512(hash, concat_hashes[0],
                              2 * crypto_hash_sha512_BYTES);
     if (res != 0)
     {

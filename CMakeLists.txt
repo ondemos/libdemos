@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.28.1 FATAL_ERROR)
 
 # Project Name
-project(demos VERSION 0.2.5)
+project(demos VERSION 0.2.6)
 
 # set(CMAKE_C_STANDARD 23)
 

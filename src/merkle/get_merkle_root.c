@@ -45,18 +45,18 @@ get_merkle_root(
       // leaves.
       if (oddLeaves && i + 1 == leaves)
       {
-        memcpy(&concat_hashes[0], &hashes[i][0], crypto_hash_sha512_BYTES);
+        memcpy(concat_hashes[0], hashes[i], crypto_hash_sha512_BYTES);
         // Concat leaf hash with itself.
-        memcpy(&concat_hashes[1], &hashes[i][0], crypto_hash_sha512_BYTES);
+        memcpy(concat_hashes[1], hashes[i], crypto_hash_sha512_BYTES);
       }
       else
       {
-        memcpy(&concat_hashes[0], &hashes[i][0], crypto_hash_sha512_BYTES);
+        memcpy(concat_hashes[0], hashes[i], crypto_hash_sha512_BYTES);
         // In any other case concat leaf hash with the one on its right.
-        memcpy(&concat_hashes[1], &hashes[i + 1][0], crypto_hash_sha512_BYTES);
+        memcpy(concat_hashes[1], hashes[i + 1], crypto_hash_sha512_BYTES);
       }
 
-      res = crypto_hash_sha512(hashes[j], *concat_hashes,
+      res = crypto_hash_sha512(hashes[j], concat_hashes[0],
                                2 * crypto_hash_sha512_BYTES);
       if (res != 0)
       {
@@ -72,7 +72,7 @@ get_merkle_root(
     leaves = ceil((double)leaves / 2);
   }
 
-  memcpy(root, *hashes, crypto_hash_sha512_BYTES);
+  memcpy(root, hashes[0], crypto_hash_sha512_BYTES);
 
   free(hashes);
   free(concat_hashes);

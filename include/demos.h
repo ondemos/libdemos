@@ -63,18 +63,17 @@ extern "C"
       const uint8_t sender_secret_key[crypto_sign_ed25519_SECRETKEYBYTES],
       const unsigned int ADDITIONAL_DATA_LEN,
       const uint8_t additional_data[ADDITIONAL_DATA_LEN],
-      uint8_t encrypted[crypto_scalarmult_curve25519_BYTES
-                        + crypto_aead_chacha20poly1305_ietf_NPUBBYTES + DATA_LEN
+      uint8_t encrypted[crypto_aead_chacha20poly1305_ietf_NPUBBYTES + DATA_LEN
                         + crypto_aead_chacha20poly1305_ietf_ABYTES]);
 
   DEMOS_PUBLIC int decrypt_chachapoly_asymmetric(
       const unsigned int ENCRYPTED_LEN,
       const uint8_t encrypted_data[ENCRYPTED_LEN],
+      const uint8_t sender_public_key[crypto_sign_ed25519_PUBLICKEYBYTES],
       const uint8_t receiver_secret_key[crypto_sign_ed25519_SECRETKEYBYTES],
       const unsigned int ADDITIONAL_DATA_LEN,
       const uint8_t additional_data[ADDITIONAL_DATA_LEN],
-      uint8_t data[ENCRYPTED_LEN - crypto_scalarmult_curve25519_BYTES
-                   - crypto_aead_chacha20poly1305_ietf_NPUBBYTES
+      uint8_t data[ENCRYPTED_LEN - -crypto_aead_chacha20poly1305_ietf_NPUBBYTES
                    - crypto_aead_chacha20poly1305_ietf_ABYTES]);
 
   DEMOS_PUBLIC

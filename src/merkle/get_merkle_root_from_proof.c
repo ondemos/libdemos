@@ -44,13 +44,13 @@ get_merkle_root_from_proof(
     // Proof artifact goes to the left
     if (position == 0)
     {
-      memcpy(&concat_hashes[0], &proof[i][0], crypto_hash_sha512_BYTES);
-      memcpy(&concat_hashes[1], &root[0], crypto_hash_sha512_BYTES);
+      memcpy(concat_hashes[0], proof[i], crypto_hash_sha512_BYTES);
+      memcpy(concat_hashes[1], root, crypto_hash_sha512_BYTES);
     }
     else if (position == 1)
     {
-      memcpy(&concat_hashes[0], &root[0], crypto_hash_sha512_BYTES);
-      memcpy(&concat_hashes[1], &proof[i][0], crypto_hash_sha512_BYTES);
+      memcpy(concat_hashes[0], root, crypto_hash_sha512_BYTES);
+      memcpy(concat_hashes[1], proof[i], crypto_hash_sha512_BYTES);
     }
     else
     {
@@ -59,7 +59,7 @@ get_merkle_root_from_proof(
       return -2;
     }
 
-    res = crypto_hash_sha512(root, *concat_hashes,
+    res = crypto_hash_sha512(root, concat_hashes[0],
                              2 * crypto_hash_sha512_BYTES);
     if (res != 0)
     {
