@@ -1,0 +1,84 @@
+name: "tagged-release"
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  tagged-release:
+    name: Tagged Release for ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            artifact_name: libdemos.dylib
+            asset_name: libdemos-linux-amd64
+          - os: windows-latest
+            artifact_name: libdemos.exe
+            asset_name: libdemos-windows-amd64
+          - os: macos-latest
+            artifact_name: libdemos.dylib
+            asset_name: libdemos-macos-amd64
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@master
+        with:
+          submodules: 'true'
+
+      - name: Cache LLVM and Clang
+        id: cache-llvm
+        uses: actions/cache@v4
+        with:
+          path: |
+            C:/Program Files/LLVM
+            ./llvm
+          key: llvm-13
+
+      - name: Install LLVM and Clang
+        uses: KyleMayes/install-llvm-action@v2.0.3
+        with:
+          version: "13"
+          cached: ${{ steps.cache-llvm.outputs.cache-hit }}
+
+      - name: CMake start
+        run: cmake -DCMAKE_EXPORT_COMPILE_COMMANDS=1 -B build
+
+      -name: CMake build
+        run: cmake --build build
+
+      - name: Setup emsdk
+        uses: mymindstorm/setup-emsdk@v14
+        with:
+          # Make sure to set a version number!
+          version: 3.1.61
+          # This is the name of the cache folder.
+          # The cache folder will be placed in the build directory,
+          #  so make sure it doesn't conflict with anything!
+          actions-cache-folder: 'emsdk-cache'
+          update: true
+
+      - name: Verify
+        run: emcc -v
+
+      - name: Setup
+        run: NODE_ENV="production" node scripts/emscripten.js
+
+      - name: Upload binaries to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: build/${{ matrix.artifact_name }}
+          asset_name: ${{ matrix.asset_name }}
+          tag: ${{ github.ref }}
+
+      - name: Upload wasm to release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: build/wasm/libdemos.js
+          asset_name: libdemos.js 
+          tag: ${{ github.ref }}
