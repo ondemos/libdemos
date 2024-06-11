@@ -1,4 +1,4 @@
-# @ondemos/core
+# @ondemos/libdemos
 
 This repository provides cryptographic tools for digital democracies.
 
