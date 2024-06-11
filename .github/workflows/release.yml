@@ -50,23 +50,6 @@ jobs:
       -name: CMake build
         run: cmake --build build
 
-      - name: Setup emsdk
-        uses: mymindstorm/setup-emsdk@v14
-        with:
-          # Make sure to set a version number!
-          version: 3.1.61
-          # This is the name of the cache folder.
-          # The cache folder will be placed in the build directory,
-          #  so make sure it doesn't conflict with anything!
-          actions-cache-folder: 'emsdk-cache'
-          update: true
-
-      - name: Verify
-        run: emcc -v
-
-      - name: Setup
-        run: NODE_ENV="production" node scripts/emscripten.js
-
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
         with:

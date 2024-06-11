@@ -69,7 +69,7 @@ chmod a+x ./build/__tests__/crypto_test
 chmod a+x ./build/__tests__/merkle_test
 ./build/__tests__/merkle_test
 
-source ./emsdk/emsdk_env.sh
-NODE_ENV="production" node scripts/emscripten.js
+# source ./emsdk/emsdk_env.sh
+# NODE_ENV="production" node scripts/emscripten.js
 # NODE_OR_BROWSER="browser" NODE_ENV="production" node scripts/emscripten.js
 # NODE_OR_BROWSER="node" NODE_ENV="production" node scripts/emscripten.js
