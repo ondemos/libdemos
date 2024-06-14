@@ -48,7 +48,7 @@ get_merkle_proof(
   // Counts the index of proof artifacts.
   k = 0;
 
-  while (leaves > 0)
+  while (leaves > 1)
   {
     // Check if number of leaves is odd or even.
     odd_leaves = leaves % 2 != 0;
@@ -115,8 +115,6 @@ get_merkle_proof(
         return -4;
       }
     }
-
-    if (leaves == 1) break;
 
     leaves = ceil((double)leaves / 2);
 

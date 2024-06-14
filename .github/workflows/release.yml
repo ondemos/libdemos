@@ -50,6 +50,9 @@ jobs:
       -name: CMake build
         run: cmake --build build
 
+      - name: Setup
+        run: NODE_ENV="production" node scripts/emscripten.js
+
       - name: Upload binaries to release
         uses: svenstaro/upload-release-action@v2
         with:

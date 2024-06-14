@@ -12,7 +12,7 @@ random_number_in_range(const int MIN, const int MAX)
   const unsigned int MAX_RANGE = pow(pow(2, 8), BYTES_NEEDED);
   const unsigned int EXTENDED_RANGE = floor(MAX_RANGE / RANGE) * RANGE;
 
-  uint8_t *randomBytes = malloc(sizeof(uint8_t[BYTES_NEEDED]));
+  uint8_t *randomBytes = (uint8_t *)malloc(sizeof(uint8_t[BYTES_NEEDED]));
   if (randomBytes == NULL) return -1;
 
   int randomInteger = EXTENDED_RANGE;

@@ -33,7 +33,7 @@ get_merkle_root(
   bool oddLeaves;
 
   // For every branch level.
-  while (leaves > 0)
+  while (leaves > 1)
   {
     // Check if number of leaves is odd or even.
     oddLeaves = leaves % 2 != 0;
@@ -66,8 +66,6 @@ get_merkle_root(
         return -3;
       }
     }
-
-    if (leaves == 1) break;
 
     leaves = ceil((double)leaves / 2);
   }
