@@ -1,4 +1,3 @@
-#include <math.h>
 #include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -12,101 +11,120 @@ main()
 
   const unsigned int IDENTITIES_LEN = 14;
 
-  uint8_t(*nonces)[crypto_auth_hmacsha512_KEYBYTES] = malloc(
-      sizeof(uint8_t[IDENTITIES_LEN][crypto_auth_hmacsha512_KEYBYTES]));
+  uint8_t *nonces = (uint8_t *)malloc(
+      sizeof(uint8_t[IDENTITIES_LEN * crypto_auth_hmacsha512_KEYBYTES]));
   if (nonces == NULL)
   {
-    printf("Could not allocate space for nonces\n");
+    printf("ERROR: Could not allocate space for nonces\n");
 
     return -1;
   }
 
-  printf("Allocated space for nonces\n");
+  printf("INFO: Allocated space for nonces\n");
 
-  uint8_t(*public_keys)[crypto_sign_ed25519_PUBLICKEYBYTES] = malloc(
-      sizeof(uint8_t[IDENTITIES_LEN][crypto_sign_ed25519_PUBLICKEYBYTES]));
+  uint8_t *public_keys = (uint8_t *)malloc(
+      sizeof(uint8_t[IDENTITIES_LEN * crypto_sign_ed25519_PUBLICKEYBYTES]));
   if (public_keys == NULL)
   {
-    printf("Could not allocate space for public keys\n");
+    printf("ERROR: Could not allocate space for public keys\n");
     free(nonces);
 
     return -2;
   }
 
-  printf("Allocated space for public keys\n");
+  printf("INFO: Allocated space for public keys\n");
 
-  uint8_t(*secret_keys)[crypto_sign_ed25519_SECRETKEYBYTES] = malloc(
-      sizeof(uint8_t[IDENTITIES_LEN][crypto_sign_ed25519_SECRETKEYBYTES]));
+  uint8_t *secret_keys = (uint8_t *)malloc(
+      sizeof(uint8_t[IDENTITIES_LEN * crypto_sign_ed25519_SECRETKEYBYTES]));
   if (secret_keys == NULL)
   {
-    printf("Could not allocate space for secret keys\n");
     free(nonces);
     free(public_keys);
+
+    printf("ERROR: Could not allocate space for secret keys\n");
 
     return -3;
   }
 
-  printf("Allocated space for secret keys\n");
+  printf("INFO: Allocated space for secret keys\n");
+
+  res = generate_identities(IDENTITIES_LEN, nonces, public_keys, secret_keys);
+  if (res != 0)
+  {
+    free(nonces);
+    free(public_keys);
+    free(secret_keys);
+
+    printf("ERROR: Could not generate identities\n");
+
+    return -4;
+  }
+
+  printf("INFO: Generated identities\n");
 
   uint8_t *commit_details
       = (uint8_t *)malloc(sizeof(uint8_t[crypto_auth_hmacsha512_BYTES]));
   if (commit_details == NULL)
   {
-    printf("Could not allocate space for commit details\n");
     free(nonces);
     free(public_keys);
     free(secret_keys);
 
+    printf("ERROR: Could not allocate space for commit details\n");
+
     return -5;
   }
 
-  printf("Allocated space for external commit details\n");
+  printf("INFO: Allocated space for commit details\n");
 
-  res = generate_identities(IDENTITIES_LEN, nonces, public_keys, secret_keys,
-                            commit_details);
+  res = generate_commit_details(IDENTITIES_LEN, nonces, public_keys,
+                                commit_details);
   if (res != 0)
   {
-    printf("Could not generate identities\n");
     free(nonces);
     free(public_keys);
     free(secret_keys);
     free(commit_details);
 
+    printf("ERROR: Could not generate commit details\n");
+
     return -6;
   }
 
-  printf("Generated identities\n");
+  printf("INFO: Generated commit details\n");
 
   uint8_t *current_commit
       = (uint8_t *)malloc(sizeof(uint8_t[crypto_hash_sha512_BYTES]));
   if (current_commit == NULL)
   {
-    printf("Could allocate space for initial commit\n");
     free(nonces);
     free(public_keys);
     free(secret_keys);
     free(commit_details);
 
+    printf("ERROR: Could allocate space for initial commit\n");
+
     return -7;
   }
 
-  printf("Allocated space for current commit\n");
+  printf("INFO: Allocated space for current commit\n");
 
   uint8_t *initial_commit
       = (uint8_t *)malloc(sizeof(uint8_t[crypto_hash_sha512_BYTES]));
   if (initial_commit == NULL)
   {
-    printf("Could allocate space for initial commit\n");
     free(nonces);
     free(public_keys);
     free(secret_keys);
     free(commit_details);
     free(current_commit);
 
+    printf("ERROR: Could allocate space for initial commit\n");
+
     return -8;
   }
 
-  printf("Allocated space for initial commit\n");
+  printf("INFO: Allocated space for initial commit\n");
 
   random_bytes(crypto_hash_sha512_BYTES, initial_commit);
 
@@ -114,12 +132,13 @@ main()
   free(commit_details);
   if (res != 0)
   {
-    printf("Could not reversibly update the initial commit\n");
     free(nonces);
     free(public_keys);
     free(secret_keys);
     free(initial_commit);
     free(current_commit);
+
+    printf("ERROR: Could not reversibly update the initial commit\n");
 
     return -9;
   }
@@ -134,24 +153,26 @@ main()
   uint8_t *proof = (uint8_t *)malloc(sizeof(uint8_t[PROOF_LEN]));
   if (proof == NULL)
   {
-    printf("Could not allocate commitment proof\n");
-
     free(nonces);
     free(public_keys);
     free(secret_keys);
     free(initial_commit);
     free(current_commit);
 
+    printf("ERROR: Could not allocate commitment proof\n");
+
     return -10;
   }
 
-  res = generate_proof(PROOF_LEN, IDENTITIES_LEN, current_commit,
-                       initial_commit, nonces, public_keys,
-                       secret_keys[IDENTITY_INDEX_USED], proof);
+  printf("INFO: Allocated proof\n");
+
+  res = generate_proof(
+      PROOF_LEN, IDENTITIES_LEN, current_commit, initial_commit, nonces,
+      public_keys,
+      secret_keys + IDENTITY_INDEX_USED * crypto_sign_ed25519_SECRETKEYBYTES,
+      proof);
   if (res != 0)
   {
-    printf("Could not generate ownership proof %d\n", res);
-
     free(proof);
     free(nonces);
     free(public_keys);
@@ -159,10 +180,12 @@ main()
     free(initial_commit);
     free(current_commit);
 
+    printf("ERROR: Could not generate ownership proof %d\n", res);
+
     return -11;
   }
 
-  printf("Generated ownership proof\n");
+  printf("INFO: Generated ownership proof\n");
 
   res = verify_proof(PROOF_LEN, current_commit, proof);
 
@@ -175,7 +198,7 @@ main()
 
   if (res < 0)
   {
-    printf("Proof verification is wrong %d\n", res);
+    printf("ERROR: Proof verification is wrong %d\n", res);
 
     return -15 + res;
   }

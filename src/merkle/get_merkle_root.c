@@ -8,7 +8,7 @@
 int
 get_merkle_root(
     const unsigned int LEAVES_LEN,
-    const uint8_t leaves_hashed[LEAVES_LEN][crypto_hash_sha512_BYTES],
+    const uint8_t leaves_hashed[LEAVES_LEN * crypto_hash_sha512_BYTES],
     uint8_t root[crypto_hash_sha512_BYTES])
 {
   size_t i, j;

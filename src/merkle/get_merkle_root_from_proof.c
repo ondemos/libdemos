@@ -8,7 +8,7 @@ int
 get_merkle_root_from_proof(
     const unsigned int PROOF_ARTIFACTS_LEN,
     const uint8_t element_hash[crypto_hash_sha512_BYTES],
-    const uint8_t proof[PROOF_ARTIFACTS_LEN][crypto_hash_sha512_BYTES + 1],
+    const uint8_t proof[PROOF_ARTIFACTS_LEN * (crypto_hash_sha512_BYTES + 1)],
     uint8_t root[crypto_hash_sha512_BYTES])
 {
   memcpy(root, element_hash, crypto_hash_sha512_BYTES);
@@ -19,18 +19,20 @@ get_merkle_root_from_proof(
 
   if (PROOF_ARTIFACTS_LEN == 1)
   {
-    bool isOne = true;
-    for (i = 0; i < crypto_hash_sha512_BYTES + 1; i++)
+    res = memcmp(proof, element_hash, crypto_hash_sha512_BYTES);
+    if (res == 0)
     {
-      if (proof[0][i] != 1)
-      {
-        isOne = false;
-        break;
-      }
-    }
+      memcpy(root, element_hash, crypto_hash_sha512_BYTES);
 
-    // Single element tree
-    if (isOne) return 0;
+      return 0;
+    }
+    else
+    {
+      // If 1 artifact then either proof is the same
+      // as the element hash, and therefore
+      // the same as the root, or we have an error
+      return -1;
+    }
   }
 
   uint8_t(*concat_hashes)[crypto_hash_sha512_BYTES]
@@ -39,18 +41,21 @@ get_merkle_root_from_proof(
 
   for (i = 0; i < PROOF_ARTIFACTS_LEN; i++)
   {
-    position = proof[i][crypto_hash_sha512_BYTES];
+    position
+        = proof[i * (crypto_hash_sha512_BYTES + 1) + crypto_hash_sha512_BYTES];
 
     // Proof artifact goes to the left
     if (position == 0)
     {
-      memcpy(concat_hashes[0], proof[i], crypto_hash_sha512_BYTES);
+      memcpy(concat_hashes[0], &proof[i * (crypto_hash_sha512_BYTES + 1)],
+             crypto_hash_sha512_BYTES);
       memcpy(concat_hashes[1], root, crypto_hash_sha512_BYTES);
     }
     else if (position == 1)
     {
       memcpy(concat_hashes[0], root, crypto_hash_sha512_BYTES);
-      memcpy(concat_hashes[1], proof[i], crypto_hash_sha512_BYTES);
+      memcpy(concat_hashes[1], &proof[i * (crypto_hash_sha512_BYTES + 1)],
+             crypto_hash_sha512_BYTES);
     }
     else
     {

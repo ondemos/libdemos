@@ -5,7 +5,7 @@
 
 int
 restore_secret(const unsigned int SHARES_LEN, const unsigned int SECRET_LEN,
-               const uint8_t shares[SHARES_LEN][SHARE_LEN(SECRET_LEN)],
+               const uint8_t shares[SHARES_LEN * (SECRET_LEN + 1)],
                uint8_t secret[SECRET_LEN])
 {
   size_t i, j;
@@ -20,8 +20,9 @@ restore_secret(const unsigned int SHARES_LEN, const unsigned int SECRET_LEN,
   {
     for (j = 0; j < SHARES_LEN; j++)
     {
-      memcpy(&points[j][0], &shares[j][SECRET_LEN], sizeof(uint8_t));
-      memcpy(&points[j][1], &shares[j][i], sizeof(uint8_t));
+      memcpy(&points[j][0], &shares[j * (SECRET_LEN + 1) + SECRET_LEN],
+             sizeof(uint8_t));
+      memcpy(&points[j][1], &shares[j * (SECRET_LEN + 1) + i], sizeof(uint8_t));
     }
 
     secret[i] = interpolate(SHARES_LEN, points);

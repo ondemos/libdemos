@@ -9,31 +9,24 @@ verify_merkle_proof(
     const unsigned int PROOF_ARTIFACTS_LEN,
     const uint8_t element_hash[crypto_hash_sha512_BYTES],
     const uint8_t root[crypto_hash_sha512_BYTES],
-    const uint8_t proof[PROOF_ARTIFACTS_LEN][crypto_hash_sha512_BYTES + 1])
+    const uint8_t proof[PROOF_ARTIFACTS_LEN * (crypto_hash_sha512_BYTES + 1)])
 {
+  int res;
   size_t i, position;
 
   if (PROOF_ARTIFACTS_LEN == 1)
   {
-    bool isOne = true;
-    for (i = 0; i < crypto_hash_sha512_BYTES + 1; i++)
+    res = memcmp(root, element_hash, crypto_hash_sha512_BYTES);
+    if (res == 0)
     {
-      if (proof[0][i] != 1)
-      {
-        isOne = false;
-        break;
-      }
-    }
-
-    // Single element tree
-    if (isOne)
-    {
-      for (i = 0; i < crypto_hash_sha512_BYTES; i++)
-      {
-        if (element_hash[i] != root[i]) return 1;
-      }
-
       return 0;
+    }
+    else
+    {
+      // If 1 artifact then either proof is the same
+      // as the element hash, and therefore
+      // the same as the root, or we have an error
+      return -1;
     }
   }
 
@@ -51,12 +44,11 @@ verify_merkle_proof(
 
   memcpy(hash, element_hash, crypto_hash_sha512_BYTES);
 
-  int res;
-
   /* for (i = 0; i < NODES_LEN; i++) */
   for (i = 0; i < PROOF_ARTIFACTS_LEN; i++)
   {
-    position = proof[i][crypto_hash_sha512_BYTES];
+    position
+        = proof[i * (crypto_hash_sha512_BYTES + 1) + crypto_hash_sha512_BYTES];
     if (position != 0 && position != 1)
     {
       free(hash);
@@ -68,13 +60,15 @@ verify_merkle_proof(
     // Proof artifact goes to the left
     if (position == 0)
     {
-      memcpy(concat_hashes[0], proof[i], crypto_hash_sha512_BYTES);
+      memcpy(concat_hashes[0], &proof[i * (crypto_hash_sha512_BYTES + 1)],
+             crypto_hash_sha512_BYTES);
       memcpy(concat_hashes[1], hash, crypto_hash_sha512_BYTES);
     }
     else
     {
       memcpy(concat_hashes[0], hash, crypto_hash_sha512_BYTES);
-      memcpy(concat_hashes[1], proof[i], crypto_hash_sha512_BYTES);
+      memcpy(concat_hashes[1], &proof[i * (crypto_hash_sha512_BYTES + 1)],
+             crypto_hash_sha512_BYTES);
     }
 
     res = crypto_hash_sha512(hash, concat_hashes[0],

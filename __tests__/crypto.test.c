@@ -12,30 +12,36 @@ main()
   uint8_t *random_array = (uint8_t *)malloc(sizeof(uint8_t[DATA_LEN]));
   if (random_array == NULL)
   {
-    printf("Could not allocate random array\n");
+    printf("ERROR: Could not allocate random array\n");
 
     return -1;
   }
+
+  printf("INFO: Allocated space for random array\n");
 
   int res = random_bytes(DATA_LEN, random_array);
   if (res != 0)
   {
     free(random_array);
 
-    printf("Could not generate random data\n");
+    printf("ERROR: Could not generate random data\n");
 
     return -2;
   }
+
+  printf("INFO: Generated random bytes\n");
 
   uint8_t *hash = (uint8_t *)malloc(sizeof(uint8_t[crypto_hash_sha512_BYTES]));
   if (hash == NULL)
   {
     free(random_array);
 
-    printf("Could not allocate space for hash\n");
+    printf("ERROR: Could not allocate space for hash\n");
 
     return -3;
   }
+
+  printf("INFO: Allocated space for hashes\n");
 
   res = sha512(DATA_LEN, random_array, hash);
   if (res != 0)
@@ -43,12 +49,12 @@ main()
     free(random_array);
     free(hash);
 
-    printf("Could not calculate SHA512 hash of data\n");
+    printf("ERROR: Could not calculate SHA512 hash of data\n");
 
     return -4;
   }
 
-  printf("Hashed some random data\n");
+  printf("INFO: Hashed some random data\n");
 
   uint8_t *ed25519_pk
       = (uint8_t *)malloc(sizeof(uint8_t[crypto_sign_ed25519_PUBLICKEYBYTES]));
@@ -57,7 +63,7 @@ main()
     free(random_array);
     free(hash);
 
-    printf("Could not allocate space for ed25519 public key\n");
+    printf("ERROR: Could not allocate space for ed25519 public key\n");
 
     return -5;
   }
@@ -70,7 +76,7 @@ main()
     free(hash);
     free(ed25519_pk);
 
-    printf("Could not allocate space for ed25519 secret key\n");
+    printf("ERROR: Could not allocate space for ed25519 secret key\n");
 
     return -6;
   }
@@ -83,7 +89,8 @@ main()
     free(ed25519_pk);
     sodium_free(ed25519_sk);
 
-    printf("Could not generate Ed25519 keypair from new_keypair function\n");
+    printf("ERROR: Could not generate Ed25519 keypair from new_keypair "
+           "function\n");
 
     return -7;
   }
@@ -96,8 +103,8 @@ main()
     free(ed25519_pk);
     sodium_free(ed25519_sk);
 
-    printf(
-        "Could not generate Ed25519 keypair from keypair_from_seed function\n");
+    printf("ERROR: Could not generate Ed25519 keypair from keypair_from_seed "
+           "function\n");
 
     return -8;
   }
@@ -110,13 +117,14 @@ main()
     free(ed25519_pk);
     sodium_free(ed25519_sk);
 
-    printf("Could not generate Ed25519 keypair from keypair_from_secret_key "
+    printf("ERROR: Could not generate Ed25519 keypair from "
+           "keypair_from_secret_key "
            "function\n");
 
     return -9;
   }
 
-  printf("Generated ed25519 keypair\n");
+  printf("INFO: Generated ed25519 keypair\n");
 
   uint8_t *sig = (uint8_t *)malloc(sizeof(uint8_t[crypto_sign_ed25519_BYTES]));
   if (sig == NULL)
@@ -126,7 +134,7 @@ main()
     free(ed25519_pk);
     sodium_free(ed25519_sk);
 
-    printf("Could not allocate space for ed25519 signature\n");
+    printf("ERROR: Could not allocate space for ed25519 signature\n");
 
     return -10;
   }
@@ -140,7 +148,7 @@ main()
     sodium_free(ed25519_sk);
     free(sig);
 
-    printf("Could not generate Ed25519 signature\n");
+    printf("ERROR: Could not generate Ed25519 signature\n");
 
     return -11;
   }
@@ -154,12 +162,12 @@ main()
     free(ed25519_pk);
     sodium_free(ed25519_sk);
 
-    printf("Could not verify signed data\n");
+    printf("ERROR: Could not verify signed data\n");
 
     return -12;
   }
 
-  printf("Signed and verified data\n");
+  printf("INFO: Signed and verified data\n");
 
   uint8_t *another_ed25519_pk
       = (uint8_t *)malloc(sizeof(uint8_t[crypto_sign_ed25519_PUBLICKEYBYTES]));
@@ -170,7 +178,7 @@ main()
     free(ed25519_pk);
     sodium_free(ed25519_sk);
 
-    printf("Could not allocate space for another ed25519 public key\n");
+    printf("ERROR: Could not allocate space for another ed25519 public key\n");
 
     return -13;
   }
@@ -185,7 +193,7 @@ main()
     sodium_free(ed25519_sk);
     free(another_ed25519_pk);
 
-    printf("Could not allocate space for another ed25519 secret key\n");
+    printf("ERROR: Could not allocate space for another ed25519 secret key\n");
 
     return -14;
   }
@@ -200,7 +208,7 @@ main()
     free(another_ed25519_pk);
     sodium_free(another_ed25519_sk);
 
-    printf("Could not generate another ed25519 keypair\n");
+    printf("ERROR: Could not generate another ed25519 keypair\n");
 
     return -15;
   }
@@ -217,7 +225,7 @@ main()
     free(another_ed25519_pk);
     sodium_free(another_ed25519_sk);
 
-    printf("Could not allocate space for asymmetric encrypted data\n");
+    printf("ERROR: Could not allocate space for asymmetric encrypted data\n");
 
     return -16;
   }
@@ -235,7 +243,7 @@ main()
     sodium_free(another_ed25519_sk);
     free(encrypted);
 
-    printf("Could not encrypt random data with asymmetric chachapoly\n");
+    printf("ERROR: Could not encrypt random data with asymmetric chachapoly\n");
 
     return -17;
   }
@@ -251,7 +259,7 @@ main()
     sodium_free(another_ed25519_sk);
     free(encrypted);
 
-    printf("Could not allocate space for decrypted data\n");
+    printf("ERROR: Could not allocate space for decrypted data\n");
 
     return -18;
   }
@@ -271,12 +279,12 @@ main()
     free(encrypted);
     free(decrypted);
 
-    printf("Could not decrypt encrypted data\n");
+    printf("ERROR: Could not decrypt encrypted data\n");
 
     return -19;
   }
 
-  printf("Encrypted and decrypted data\n");
+  printf("INFO: Encrypted and decrypted data\n");
 
   free(hash);
   free(ed25519_pk);
@@ -293,7 +301,8 @@ main()
       free(random_array);
       free(decrypted);
 
-      printf("Could not decrypt secret at index %zu, decrypted was %d while "
+      printf("ERROR: Could not decrypt secret at index %zu, decrypted was %d "
+             "while "
              "original was %d\n",
              i, decrypted[i], random_array[i]);
 

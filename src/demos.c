@@ -3,6 +3,7 @@
 #include "./shamir/shamir.c"
 #include "./utils/utils.c"
 #include "commit.c"
+#include "commit_details.c"
 #include "identities.c"
 #include "proof.c"
 #include "verify.c"

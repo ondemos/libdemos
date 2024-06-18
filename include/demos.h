@@ -97,9 +97,15 @@ extern "C"
 
   DEMOS_PUBLIC int generate_identities(
       const unsigned int IDENTITIES_LEN,
-      uint8_t nonces[IDENTITIES_LEN][crypto_auth_hmacsha512_KEYBYTES],
-      uint8_t public_keys[IDENTITIES_LEN][crypto_sign_ed25519_PUBLICKEYBYTES],
-      uint8_t secret_keys[IDENTITIES_LEN][crypto_sign_ed25519_SECRETKEYBYTES],
+      uint8_t nonces[IDENTITIES_LEN * crypto_auth_hmacsha512_KEYBYTES],
+      uint8_t public_keys[IDENTITIES_LEN * crypto_sign_ed25519_PUBLICKEYBYTES],
+      uint8_t secret_keys[IDENTITIES_LEN * crypto_sign_ed25519_SECRETKEYBYTES]);
+
+  DEMOS_PUBLIC int generate_commit_details(
+      const unsigned int IDENTITIES_LEN,
+      const uint8_t nonces[IDENTITIES_LEN * crypto_auth_hmacsha512_KEYBYTES],
+      const uint8_t
+          public_keys[IDENTITIES_LEN * crypto_sign_ed25519_PUBLICKEYBYTES],
       uint8_t commit_details[crypto_auth_hmacsha512_BYTES]);
 
   DEMOS_PUBLIC int commit(uint8_t out[crypto_hash_sha512_BYTES],
@@ -110,9 +116,9 @@ extern "C"
       const unsigned int PROOF_LEN, const unsigned int IDENTITIES_LEN,
       const uint8_t current_commit[crypto_hash_sha512_BYTES],
       const uint8_t previous_commit[crypto_hash_sha512_BYTES],
-      const uint8_t nonces[IDENTITIES_LEN][crypto_auth_hmacsha512_KEYBYTES],
-      const uint8_t public_keys[IDENTITIES_LEN]
-                               [crypto_sign_ed25519_PUBLICKEYBYTES],
+      const uint8_t nonces[IDENTITIES_LEN * crypto_auth_hmacsha512_KEYBYTES],
+      const uint8_t
+          public_keys[IDENTITIES_LEN * crypto_sign_ed25519_PUBLICKEYBYTES],
       const uint8_t secret_key[crypto_sign_ed25519_SECRETKEYBYTES],
       uint8_t proof[PROOF_LEN]);
 
@@ -123,36 +129,43 @@ extern "C"
 
   DEMOS_PUBLIC int get_merkle_proof(
       const unsigned int LEAVES_LEN,
-      const uint8_t leaves_hashed[LEAVES_LEN][crypto_hash_sha512_BYTES],
+      const uint8_t leaves_hashed[LEAVES_LEN * crypto_hash_sha512_BYTES],
       const uint8_t element_hash[crypto_hash_sha512_BYTES],
-      uint8_t proof[LEAVES_LEN][crypto_hash_sha512_BYTES + 1]);
+      uint8_t proof[LEAVES_LEN * (crypto_hash_sha512_BYTES + 1)]);
 
   DEMOS_PUBLIC int get_merkle_root(
       const unsigned int LEAVES_LEN,
-      const uint8_t leaves_hashed[LEAVES_LEN][crypto_hash_sha512_BYTES],
+      const uint8_t leaves_hashed[LEAVES_LEN * crypto_hash_sha512_BYTES],
       uint8_t root[crypto_hash_sha512_BYTES]);
 
   DEMOS_PUBLIC int get_merkle_root_from_proof(
       const unsigned int PROOF_ARTIFACTS_LEN,
       const uint8_t element_hash[crypto_hash_sha512_BYTES],
-      const uint8_t proof[PROOF_ARTIFACTS_LEN][crypto_hash_sha512_BYTES + 1],
+      const uint8_t proof[PROOF_ARTIFACTS_LEN * (crypto_hash_sha512_BYTES + 1)],
       uint8_t root[crypto_hash_sha512_BYTES]);
 
-  DEMOS_PUBLIC int verify_merkle_proof(
-      const unsigned int PROOF_ARTIFACTS_LEN,
-      const uint8_t element_hash[crypto_hash_sha512_BYTES],
-      const uint8_t root[crypto_hash_sha512_BYTES],
-      const uint8_t proof[PROOF_ARTIFACTS_LEN][crypto_hash_sha512_BYTES + 1]);
+  DEMOS_PUBLIC int
+  verify_merkle_proof(const unsigned int PROOF_ARTIFACTS_LEN,
+                      const uint8_t element_hash[crypto_hash_sha512_BYTES],
+                      const uint8_t root[crypto_hash_sha512_BYTES],
+                      const uint8_t proof[PROOF_ARTIFACTS_LEN
+                                          * (crypto_hash_sha512_BYTES + 1)]);
 
   DEMOS_PUBLIC int split_secret(const unsigned int SHARES_LEN,
                                 const unsigned int THRESHOLD,
                                 const unsigned int SECRET_LEN,
                                 const uint8_t secret[SECRET_LEN],
-                                uint8_t shares[SHARES_LEN][SECRET_LEN + 1]);
+                                uint8_t shares[SHARES_LEN * (SECRET_LEN + 1)]);
+
+  DEMOS_PUBLIC int split_secret_with_randomness(
+      const unsigned int SHARES_LEN, const unsigned int THRESHOLD,
+      const unsigned int SECRET_LEN, const uint8_t secret[SECRET_LEN],
+      uint8_t coefficients[SECRET_LEN * THRESHOLD],
+      uint8_t shares[SHARES_LEN * (SECRET_LEN + 1)]);
 
   DEMOS_PUBLIC int
   restore_secret(const unsigned int SHARES_LEN, const unsigned int SECRET_LEN,
-                 const uint8_t shares[SHARES_LEN][SECRET_LEN + 1],
+                 const uint8_t shares[SHARES_LEN * (SECRET_LEN + 1)],
                  uint8_t secret[SECRET_LEN]);
 
 #ifdef __cplusplus

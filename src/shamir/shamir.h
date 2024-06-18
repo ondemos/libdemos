@@ -5,7 +5,6 @@
 #include <stdint.h>
 
 #define FIELD 256
-#define SHARE_LEN(SECRET_LEN) SECRET_LEN + 1
 
 unsigned int interpolate(const size_t SHARES_LEN,
                          const uint8_t points[2][SHARES_LEN]);
